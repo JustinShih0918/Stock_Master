@@ -13,9 +13,9 @@ build/
 *.egg-info/
 
 # Runtime data: raw payloads, generated reports, logs, model checkpoints (reproducible from code + sources)
-data/
-artifacts/
-logs/
+/data/
+/artifacts/
+/logs/
 reference/*
 !reference/README.md
 
