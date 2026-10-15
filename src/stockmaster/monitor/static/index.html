@@ -1,0 +1,298 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Stock Master 監控面板</title>
+<style>
+:root{
+  --bg:#f6f7f9; --panel:#fff; --ink:#1b1f24; --muted:#6a737d; --line:#e3e6ea;
+  --up:#d1242f; --down:#1a7f37; --accent:#0969da; --warn:#9a6700; --chip:#eef1f4;
+  --bench:#8c959f;
+}
+@media (prefers-color-scheme: dark){
+  :root{ --bg:#0d1117; --panel:#161b22; --ink:#e6edf3; --muted:#8b949e; --line:#30363d;
+    --up:#ff6b6b; --down:#3fb950; --accent:#58a6ff; --warn:#d29922; --chip:#21262d; --bench:#6e7681; }
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.5 -apple-system,"Segoe UI","Noto Sans TC","PingFang TC",sans-serif}
+header{position:sticky;top:0;z-index:5;background:var(--panel);border-bottom:1px solid var(--line);
+  padding:10px 20px;display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+header h1{font-size:16px;margin:0 12px 0 0;font-weight:650}
+.badge{display:inline-block;padding:2px 8px;border-radius:999px;background:var(--chip);font-size:12px;color:var(--muted)}
+.badge.live{background:color-mix(in srgb,var(--up) 15%,transparent);color:var(--up)}
+.badge.warn{background:color-mix(in srgb,var(--warn) 18%,transparent);color:var(--warn)}
+.badge.ok{background:color-mix(in srgb,var(--down) 15%,transparent);color:var(--down)}
+.spacer{flex:1}
+main{max-width:1280px;margin:0 auto;padding:16px 20px 60px}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}
+.tab{border:1px solid var(--line);background:var(--panel);color:var(--ink);padding:6px 12px;border-radius:8px;cursor:pointer;font:inherit}
+.tab.on{border-color:var(--accent);color:var(--accent);font-weight:600}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin-bottom:14px}
+.kpi{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+.kpi .l{color:var(--muted);font-size:12px}
+.kpi .v{font-size:20px;font-weight:650;font-variant-numeric:tabular-nums;margin-top:2px}
+.kpi .s{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
+section{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin-bottom:14px}
+section h2{font-size:14px;margin:0 0 10px;font-weight:650;display:flex;gap:8px;align-items:center}
+.scroll{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums}
+th,td{padding:6px 8px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap}
+th{color:var(--muted);font-weight:500;font-size:12px}
+td.l,th.l{text-align:left}
+td.wrap{white-space:normal;text-align:left;min-width:220px}
+.up{color:var(--up)} .down{color:var(--down)} .muted{color:var(--muted)}
+.empty{color:var(--muted);padding:8px 0}
+.dec{border-top:1px solid var(--line);padding:12px 0}
+.dec:first-child{border-top:0;padding-top:0}
+.dec .hd{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.dec .when{font-weight:600}
+.src{padding:1px 8px;border-radius:999px;font-size:12px;background:var(--chip)}
+.src.llm{background:color-mix(in srgb,var(--accent) 18%,transparent);color:var(--accent)}
+.src.det_repair,.src.llm_repair{background:color-mix(in srgb,var(--warn) 18%,transparent);color:var(--warn)}
+.src.fallback,.src.hold,.src.error{background:color-mix(in srgb,var(--up) 15%,transparent);color:var(--up)}
+.view{margin:6px 0;color:var(--ink)}
+details{margin-top:6px} summary{cursor:pointer;color:var(--accent)}
+pre{white-space:pre-wrap;background:var(--chip);padding:10px;border-radius:8px;font-size:12px;max-height:420px;overflow:auto}
+ul.tight{margin:4px 0;padding-left:18px}
+svg text{fill:var(--muted);font-size:11px}
+.legend{display:flex;gap:14px;font-size:12px;color:var(--muted)}
+.legend i{display:inline-block;width:14px;height:3px;vertical-align:middle;margin-right:4px}
+a{color:var(--accent)}
+.err{color:var(--up)}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media (max-width:900px){.two{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header>
+  <h1>Stock Master 監控面板</h1>
+  <span class="badge" id="clock">—</span>
+  <span class="badge" id="session">—</span>
+  <span class="badge warn">模擬交易 · 不下真實委託</span>
+  <span class="spacer"></span>
+  <span class="badge" id="updated">—</span>
+</header>
+<main>
+  <div class="tabs" id="tabs"></div>
+  <div id="err" class="err"></div>
+  <div class="grid" id="kpis"></div>
+
+  <section>
+    <h2>淨值走勢 <span class="legend"><span><i style="background:var(--accent)"></i>帳戶報酬</span><span><i style="background:var(--bench)"></i><span id="benchName">基準</span></span></span></h2>
+    <div id="chart"></div>
+  </section>
+
+  <section>
+    <h2>目前持股 <span class="badge" id="asof"></span></h2>
+    <div class="scroll" id="holdings"></div>
+  </section>
+
+  <section>
+    <h2>待執行委託</h2>
+    <div class="scroll" id="pending"></div>
+  </section>
+
+  <section>
+    <h2>AI 決策紀錄 <span class="muted" style="font-weight:400;font-size:12px">何時、哪個模型、做了什麼、為什麼</span></h2>
+    <div id="decisions"></div>
+  </section>
+
+  <div class="two">
+    <section><h2>成交紀錄</h2><div class="scroll" id="fills"></div></section>
+    <section><h2>系統狀態</h2><div id="system"></div></section>
+  </div>
+</main>
+<script>
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const nf = (x, d=0) => x == null || isNaN(x) ? "—" : Number(x).toLocaleString("zh-TW",{minimumFractionDigits:d,maximumFractionDigits:d});
+const pct = (x, d=2) => x == null || isNaN(x) ? "—" : (x>0?"+":"") + (x*100).toFixed(d) + "%";
+const cls = x => x == null ? "" : x > 0 ? "up" : x < 0 ? "down" : "";
+const signed = (x, d=0) => x == null ? "—" : (x>0?"+":"") + nf(x, d);
+const SRC = {llm:"AI 決策", llm_repair:"AI（經回饋修正）", det_repair:"AI＋風控修正", fallback:"量化備援（LLM 不可用）",
+             hold:"不交易（風控）", quant:"量化規則", error:"執行失敗"};
+const SESS = {pre:"盤前", pre_open:"即將開盤", open:"盤中", after_hours:"盤後", closed:"休市"};
+let state = {account: localStorage.getItem("sm.account"), accounts: []};
+
+async function get(url){ const r = await fetch(url); const j = await r.json(); if(!r.ok) throw new Error(j.error || j.detail || r.status); return j; }
+function tickClock(){ $("clock").textContent = new Date().toLocaleString("zh-TW",{timeZone:"Asia/Taipei",hour12:false}) + " 台北"; }
+
+async function refresh(){
+  try{
+    const ov = await get("/api/overview");
+    $("err").textContent = "";
+    const s = ov.session;
+    $("session").textContent = (s.trading_day ? "交易日 · " : "非交易日 · ") + (SESS[s.session]||s.session) + " · 下個交易日 " + s.next_trading_day;
+    $("session").className = "badge" + (s.session === "open" ? " live" : "");
+    state.accounts = ov.accounts;
+    if(!state.account || !ov.accounts.find(a => a.id === state.account)) state.account = ov.accounts[0]?.id;
+    renderTabs();
+    if(state.account) await loadAccount(state.account);
+    else $("kpis").innerHTML = '<div class="empty">尚無帳戶。排程器第一次執行決策後會出現。</div>';
+    loadSystem();
+    $("updated").textContent = "更新於 " + new Date().toLocaleTimeString("zh-TW",{timeZone:"Asia/Taipei",hour12:false});
+  }catch(e){ $("err").textContent = "讀取失敗：" + e.message; }
+}
+
+function renderTabs(){
+  $("tabs").innerHTML = state.accounts.map(a => {
+    const label = a.kind === "retail" ? `小額帳戶 ${a.id}` : a.id === "live" ? "比賽帳戶 live" : `${a.id}`;
+    return `<button class="tab ${a.id===state.account?"on":""}" data-id="${esc(a.id)}">${esc(label)} <span class="${cls(a.return)}">${pct(a.return)}</span></button>`;
+  }).join("");
+  document.querySelectorAll(".tab").forEach(b => b.onclick = () => { state.account = b.dataset.id; localStorage.setItem("sm.account", state.account); renderTabs(); loadAccount(state.account); });
+}
+
+async function loadAccount(id){
+  const [acc, nav, decs, fl] = await Promise.all([get(`/api/account/${id}`), get(`/api/account/${id}/nav`),
+    get(`/api/account/${id}/decisions?limit=30`), get(`/api/account/${id}/fills?limit=60`)]);
+  const ov = state.accounts.find(a => a.id === id) || {};
+  renderKpis(acc, ov);
+  renderChart(nav);
+  renderHoldings(acc);
+  renderPending(acc.pending || []);
+  renderDecisions(decs);
+  renderFills(fl, acc.lot_size);
+}
+
+function renderKpis(acc, ov){
+  const start = acc.start_cash, live = acc.live || {};
+  const nav = live.nav ?? acc.nav;
+  const total = nav + (acc.accrued_dividends||0) - start;
+  const bench = ov.benchmark_return;
+  const k = [
+    ["淨值" + (live.nav!=null ? "（即時）" : ""), "NT$ " + nf(nav), acc.as_of ? "結算日 " + acc.as_of : "尚未結算"],
+    ["總損益", `<span class="${cls(total)}">${signed(total)}</span>`, `<span class="${cls(total)}">${pct(total/start)}</span> · 本金 NT$ ${nf(start)}`],
+    ["今日損益" + (live.day_pnl!=null ? "（即時）" : ""), `<span class="${cls(live.day_pnl ?? ov.day_change)}">${signed(live.day_pnl ?? ov.day_change)}</span>`, live.day_pnl!=null ? "相對前一日收盤" : "最近結算日相對前一日"],
+    ["現金", "NT$ " + nf(acc.cash), acc.nav ? "佔淨值 " + pct(acc.cash/acc.nav,1).replace("+","") : ""],
+    [`基準 ${esc(ov.benchmark||"")}`, `<span class="${cls(bench)}">${pct(bench)}</span>`, bench!=null ? `超額 <span class="${cls(ov.return-bench)}">${pct(ov.return-bench)}</span>` : "需至少一個結算日"],
+    ["已實現損益", `<span class="${cls(acc.realized)}">${signed(acc.realized)}</span>`, "累計手續費＋稅 NT$ " + nf(acc.fees)],
+  ];
+  $("kpis").innerHTML = k.map(([l,v,s]) => `<div class="kpi"><div class="l">${l}</div><div class="v">${v}</div><div class="s">${s}</div></div>`).join("");
+}
+
+function renderChart(nav){
+  $("benchName").textContent = nav.benchmark || "基準";
+  const pts = nav.points || [];
+  if(pts.length < 1){ $("chart").innerHTML = '<div class="empty">尚無結算資料。第一個交易日收盤結算（17:50）後開始繪製。</div>'; return; }
+  const W = 1200, H = 260, L = 56, R = 16, T = 12, B = 28;
+  const series = [{k:"return", c:"var(--accent)"}, {k:"benchmark_return", c:"var(--bench)"}];
+  const all = [0]; pts.forEach(p => series.forEach(s => p[s.k]!=null && all.push(p[s.k])));
+  let lo = Math.min(...all), hi = Math.max(...all); if(hi-lo < 0.01){ hi += 0.005; lo -= 0.005; }
+  const pad = (hi-lo)*0.1; lo -= pad; hi += pad;
+  const x = i => L + (pts.length===1 ? (W-L-R)/2 : i*(W-L-R)/(pts.length-1));
+  const y = v => T + (hi-v)*(H-T-B)/(hi-lo);
+  let g = "";
+  for(let i=0;i<=4;i++){ const v = lo + (hi-lo)*i/4; g += `<line x1="${L}" x2="${W-R}" y1="${y(v)}" y2="${y(v)}" stroke="var(--line)"/><text x="${L-6}" y="${y(v)+4}" text-anchor="end">${(v*100).toFixed(1)}%</text>`; }
+  g += `<line x1="${L}" x2="${W-R}" y1="${y(0)}" y2="${y(0)}" stroke="var(--muted)" stroke-dasharray="3 3"/>`;
+  const step = Math.max(1, Math.ceil(pts.length/8));
+  pts.forEach((p,i) => { if(i%step===0 || i===pts.length-1) g += `<text x="${x(i)}" y="${H-8}" text-anchor="middle">${p.date.slice(5)}</text>`; });
+  series.forEach(s => {
+    const seg = pts.map((p,i) => p[s.k]==null ? null : [x(i), y(p[s.k])]).filter(Boolean);
+    if(seg.length > 1) g += `<polyline fill="none" stroke="${s.c}" stroke-width="2.2" points="${seg.map(a=>a.join(",")).join(" ")}"/>`;
+    seg.forEach(a => g += `<circle cx="${a[0]}" cy="${a[1]}" r="${seg.length>40?0:2.5}" fill="${s.c}"/>`);
+  });
+  const last = pts[pts.length-1];
+  $("chart").innerHTML = `<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="報酬走勢">${g}</svg>
+    <div class="muted" style="font-size:12px">最新 ${last.date}：帳戶 <span class="${cls(last.return)}">${pct(last.return)}</span>　基準 <span class="${cls(last.benchmark_return)}">${pct(last.benchmark_return)}</span></div>`;
+}
+
+function renderHoldings(acc){
+  $("asof").textContent = acc.as_of ? "結算日 " + acc.as_of : "";
+  const rows = acc.rows || [];
+  if(!rows.length){ $("holdings").innerHTML = '<div class="empty">目前沒有持股（全部為現金）。</div>'; return; }
+  const live = rows.some(r => r.live);
+  $("holdings").innerHTML = `<table><tr><th class="l">代號</th><th class="l">名稱</th><th class="l">產業</th><th>股數</th><th>成本均價</th>
+    <th>收盤</th>${live?"<th>即時價</th><th>今日</th>":""}<th>市值</th><th>權重</th><th>未實現損益</th><th>報酬</th><th>建倉日</th></tr>` +
+    rows.map(r => {
+      const lp = r.live?.price, lv = r.live_value ?? r.value, un = r.live_unrealized ?? r.unrealized, up = r.live_unrealized_pct ?? r.unrealized_pct;
+      const day = lp!=null && r.close ? lp/r.close-1 : null;
+      return `<tr><td class="l">${esc(r.code)}</td><td class="l">${esc(r.name)}</td><td class="l muted">${esc(r.industry||"")}</td>
+      <td>${nf(r.shares)}</td><td>${nf(r.avg_cost,2)}</td><td>${nf(r.close,2)}</td>
+      ${live?`<td title="${esc(r.live?.source||"")} ${esc(r.live?.time||"")}">${nf(lp,2)}</td><td class="${cls(day)}">${pct(day)}</td>`:""}
+      <td>${nf(lv)}</td><td>${pct(r.weight,1).replace("+","")}</td><td class="${cls(un)}">${signed(un)}</td><td class="${cls(up)}">${pct(up)}</td><td class="muted">${esc(r.opened||"—")}</td></tr>`;
+    }).join("") + `</table>${live?'<div class="muted" style="font-size:12px;margin-top:6px">即時價僅供顯示（TWSE MIS，失敗時改用 Yahoo 非官方資料）；帳務以收盤結算為準。</div>':""}`;
+}
+
+function renderPending(p){
+  if(!p.length){ $("pending").innerHTML = '<div class="empty">沒有等待成交的委託。</div>'; return; }
+  $("pending").innerHTML = p.map(d => `<div style="margin-bottom:8px"><b>交易日 ${esc(d.trade_date)}</b>　<span class="muted">決策於 ${fmtTime(d.decided_at)} · ${esc(d.model||"無 LLM")} · ${esc(SRC[d.source]||d.source)}</span>
+    ${d.orders.length ? `<table><tr><th class="l">代號</th><th class="l">名稱</th><th class="l">買賣</th><th>股數</th><th>參考價</th><th>預估金額</th><th class="l">理由</th></tr>` +
+      d.orders.map(o => `<tr><td class="l">${esc(o.code)}</td><td class="l">${esc(o.name)}</td><td class="l ${o.side==="buy"?"up":"down"}">${o.side==="buy"?"買進":"賣出"}</td>
+      <td>${nf(o.shares)}</td><td>${nf(o.ref_price,2)}</td><td>${nf(o.est_amount)}</td><td class="wrap">${esc(o.rationale)}</td></tr>`).join("") + "</table>"
+      : '<div class="empty">決策為不交易。</div>'}</div>`).join("");
+}
+
+function fmtTime(s){ return s ? new Date(s).toLocaleString("zh-TW",{timeZone:"Asia/Taipei",hour12:false,month:"2-digit",day:"2-digit",hour:"2-digit",minute:"2-digit"}) : "—"; }
+
+function renderDecisions(list){
+  if(!list.length){ $("decisions").innerHTML = '<div class="empty">尚無決策。排程器會在交易日前一晚 21:55 執行。</div>'; return; }
+  $("decisions").innerHTML = list.map(d => {
+    const src = d.status === "error" ? "error" : d.source;
+    const orders = d.orders.length ? d.orders.map(o => `<span class="${o.side==="buy"?"up":"down"}">${o.side==="buy"?"買":"賣"} ${esc(o.code)} ${esc(o.name)} ${nf(o.shares)} 股</span>`).join("、") : "不交易";
+    const targets = (d.targets||[]).map(t => `<li><b>${esc(t.code)} ${esc(t.name)}</b> 目標 ${pct(t.target_weight,1).replace("+","")}${t.conviction?` · 信心 ${t.conviction}`:""}：${esc(t.rationale||"—")}</li>`).join("");
+    const checks = (d.failed_checks||[]).map(c => `<li>[${esc(c.severity)}] ${esc(c.rule_id)}：${esc(c.detail)}</li>`).join("");
+    const notes = (d.repair_notes||[]).map(n => `<li>${esc(n)}</li>`).join("");
+    return `<div class="dec">
+      <div class="hd"><span class="when">${fmtTime(d.started_at)}</span>
+        <span class="muted">→ 交易日 ${esc(d.trade_date)} · 時段 ${esc(d.slot)}${d.duration_s!=null?` · 耗時 ${Math.round(d.duration_s)} 秒`:""}</span>
+        <span class="src ${esc(src)}">${esc(SRC[src]||src||"—")}</span>
+        <span class="badge">${esc(d.model_id || "無 LLM")}</span>
+        ${d.is_final?'<span class="badge ok">最終決策</span>':'<span class="badge">未採用</span>'}
+        ${d.report?`<a href="/artifacts/${esc(d.report)}" target="_blank">決策報告</a>`:""}</div>
+      <div style="margin-top:4px">委託：${orders}${d.post_trade?.est_cost!=null?` <span class="muted">· 預估費用 NT$ ${nf(d.post_trade.est_cost)}</span>`:""}</div>
+      ${d.error?`<div class="err">錯誤：${esc(d.error)}</div>`:""}
+      ${d.market_view?`<div class="view">${esc(d.market_view)}</div>`:""}
+      <details><summary>目標持股與理由、檢查、LLM 對話</summary>
+        ${targets?`<ul class="tight">${targets}</ul>`:'<div class="muted">交易後無持股。</div>'}
+        ${d.risk_notes?`<div><b>風險：</b>${esc(d.risk_notes)}</div>`:""}
+        ${checks?`<div><b>未通過的檢查</b><ul class="tight">${checks}</ul></div>`:""}
+        ${notes?`<div><b>系統調整</b><ul class="tight">${notes}</ul></div>`:""}
+        ${(d.stale_inputs||[]).length?`<div class="err">資料警示：${esc(d.stale_inputs.join("、"))}</div>`:""}
+        <div class="muted">LLM 嘗試：${esc((d.llm_attempts||[]).join("；")||"—")}</div>
+        <div id="run-${d.run_id}"><a href="#" onclick="loadRun('${d.run_id}');return false">載入模型原始輸出</a></div>
+      </details></div>`;
+  }).join("");
+}
+
+async function loadRun(id){
+  const el = $("run-"+id); el.textContent = "載入中…";
+  try{
+    const r = await get(`/api/run/${id}`);
+    el.innerHTML = r.calls.length ? r.calls.map(c => `<div style="margin-top:8px"><b>#${c.seq} ${esc(c.provider)}:${esc(c.model_id)}</b>
+      <span class="muted">${fmtTime(c.started_at)} · ${esc(c.status)} · ${c.latency_ms!=null?Math.round(c.latency_ms/1000)+" 秒":"—"} · tokens ${nf(c.prompt_tokens)}/${nf(c.completion_tokens)}</span>
+      ${c.error?`<div class="err">${esc(c.error)}</div>`:""}
+      ${c.reasoning?`<details><summary>推理過程</summary><pre>${esc(c.reasoning)}</pre></details>`:""}
+      <pre>${esc(c.content)}</pre></div>`).join("") +
+      (r.proposals.length ? `<div><b>提案驗證</b><ul class="tight">${r.proposals.map(p => `<li>${p.accepted?"✔ 通過":"✘ 退回"}：${esc(p.feedback||"")}</li>`).join("")}</ul></div>` : "")
+      : '<div class="muted">此次執行沒有呼叫 LLM。</div>';
+  }catch(e){ el.innerHTML = `<span class="err">${esc(e.message)}</span>`; }
+}
+
+function renderFills(f, lot){
+  if(!f.length){ $("fills").innerHTML = '<div class="empty">尚無成交。</div>'; return; }
+  $("fills").innerHTML = `<table><tr><th class="l">日期</th><th class="l">標的</th><th class="l">買賣</th><th>股數</th><th>成交價</th><th>金額</th><th>手續費</th><th>稅</th></tr>` +
+    f.map(x => `<tr><td class="l">${esc(x.date)}</td><td class="l">${esc(x.code)} ${esc(x.name)}</td><td class="l ${x.side==="buy"?"up":"down"}">${x.side==="buy"?"買進":"賣出"}${x.status!=="applied"?" (作廢)":""}</td>
+      <td>${nf(x.lots*(lot||1))}</td><td>${nf(x.price,2)}</td><td>${nf(x.gross)}</td><td>${nf(x.commission)}</td><td>${nf(x.tax)}</td></tr>`).join("") + "</table>";
+}
+
+async function loadSystem(){
+  try{
+    const s = await get("/api/system");
+    const hb = s.heartbeat;
+    const hbAge = hb ? (Date.now() - new Date(hb.at).getTime())/60000 : null;
+    const ds = Object.entries(s.datasets).map(([k,v]) => `<tr><td class="l">${esc(k)}</td><td>${esc(v.last_date||"—")}</td><td>${nf(v.rows_last_date)}</td></tr>`).join("");
+    const runs = s.runs.slice(0,8).map(r => `<tr><td class="l">${fmtTime(r.started_at)}</td><td class="l">${esc(r.account_id||r.kind)}</td><td class="l ${r.status==="ok"?"":"err"}">${esc(r.status)}</td><td class="l muted">${esc(r.model_id||"")}</td></tr>`).join("");
+    const al = s.alerts.slice(0,6).map(a => `<li class="${a.level==="error"?"err":""}">${fmtTime(a.at)} ${esc(a.message)}</li>`).join("");
+    $("system").innerHTML = `<div>排程器：${hb ? `<span class="badge ${hbAge<3?"ok":"warn"}">${hbAge<3?"運作中":"已 "+Math.round(hbAge)+" 分鐘無回應"}</span> <span class="muted">${esc(hb.next_jobs||"")}</span>` : '<span class="badge warn">無心跳紀錄</span>'}</div>
+      <table style="margin-top:8px"><tr><th class="l">資料集</th><th>最新日期</th><th>筆數</th></tr>${ds}</table>
+      <table style="margin-top:8px"><tr><th class="l">最近執行</th><th class="l">帳戶</th><th class="l">狀態</th><th class="l">模型</th></tr>${runs||'<tr><td class="l muted" colspan="4">—</td></tr>'}</table>
+      ${al?`<div style="margin-top:8px"><b>警示</b><ul class="tight">${al}</ul></div>`:""}`;
+  }catch(e){ $("system").innerHTML = `<span class="err">${esc(e.message)}</span>`; }
+}
+
+tickClock(); setInterval(tickClock, 1000);
+refresh(); setInterval(refresh, 30000);
+</script>
+</body>
+</html>

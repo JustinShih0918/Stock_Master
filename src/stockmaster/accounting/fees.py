@@ -26,7 +26,7 @@ def make_fill(code: str, side: Side, lots: int, price: Decimal | float, fees: Fe
     commission = max(commission, Decimal(str(fees.min_commission)))
     tax = Decimal(0)
     if side is Side.SELL:
-        tax = _round(gross * Decimal(str(fees.sell_tax_rate)), fees.rounding)
+        tax = _round(gross * Decimal(str(fees.sell_tax(code))), fees.rounding)
     return Fill(code=code, side=side, lots=lots, price=price, gross=gross,
                 commission=commission, tax=tax)
 

@@ -37,6 +37,12 @@ class Fees(_Frozen):
     sell_tax_rate: float
     rounding: str  # floor | round | none
     min_commission: float = 0.0
+    etf_sell_tax_rate: float | None = None  # 證交稅 on ETF sells (0.1%); None = same as stocks
+
+    def sell_tax(self, code: str) -> float:
+        if self.etf_sell_tax_rate is not None and code.startswith("00"):
+            return self.etf_sell_tax_rate
+        return self.sell_tax_rate
 
 
 class Holdings(_Frozen):

@@ -171,25 +171,26 @@ def sync_calendar(engine: Engine, fetcher: Fetcher) -> int:
 
 
 def sync_instruments(engine: Engine, fetcher: Fetcher) -> dict[str, int]:
-    """Instrument master from the ISIN registry: every listed stock and ETF on TWSE and TPEx."""
+    """Instrument master from the ISIN registry: every listed stock, ETF, preferred share and TDR
+    on TWSE and TPEx (warrants excluded), with industry and listing date."""
+    from stockmaster.data.sources._parse import is_stock_code
+    keep_types = {"股票", "ETF", "特別股", "臺灣存託憑證(TDR)", "ETN"}
     out = {}
-    for market in ("TWSE", "TPEx"):
-        for issue in ("stock", "etf"):
-            res = fetcher.get("isin", isin.URL, params=isin.params(market, issue),
-                              name=f"isin_{market}_{issue}")
-            rows = isin.parse_isin_html(res.content)
-            record_fetch(engine, res, row_count=len(rows))
-            recs = []
-            for r in rows:
-                if r["market"] != market:
-                    continue
-                try:
-                    listed = pd.Timestamp(r["listed"].replace("/", "-")).date() if r["listed"] else None
-                except ValueError:
-                    listed = None
-                recs.append({"code": r["code"], "name": r["name"], "market": market,
-                             "industry": "ETF" if issue == "etf" else r["industry"], "listed_date": listed})
-            out[f"{market}_{issue}"] = upsert(engine, schema.instrument, recs)
+    for market, mode in isin.MODES.items():
+        res = fetcher.get("isin", isin.MODE_URL, params={"strMode": mode}, name=f"isin_mode{mode}")
+        rows = [r for r in isin.parse_mode_html(res.content)
+                if r["market"] == market and r["type"] in keep_types and is_stock_code(r["code"])]
+        record_fetch(engine, res, row_count=len(rows))
+        recs = []
+        for r in rows:
+            try:
+                listed = pd.Timestamp(r["listed"].replace("/", "-")).date() if r["listed"] else None
+            except ValueError:
+                listed = None
+            recs.append({"code": r["code"], "name": r["name"], "market": market,
+                         "industry": "ETF" if r["type"] in ("ETF", "ETN") else (r["industry"] or r["type"]),
+                         "listed_date": listed})
+        out[market] = upsert(engine, schema.instrument, recs)
     return out
 
 

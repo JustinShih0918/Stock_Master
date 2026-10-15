@@ -109,7 +109,8 @@ def _dividends(engine: Engine, on: date, after: date | None = None) -> dict[str,
 
 
 def save_day(engine: Engine, account_id: str, res: DayResult, day_status: str,
-             organizer_nav: Decimal | None = None, active_share: tuple[float, str] | None = None) -> None:
+             organizer_nav: Decimal | None = None, active_share: tuple[float, str] | None = None,
+             lot_size: int = 1000) -> None:
     v, s = res.valuation, res.state
     with engine.begin() as conn:
         conn.execute(delete(schema.position_day).where(schema.position_day.c.account_id == account_id)
@@ -130,7 +131,7 @@ def save_day(engine: Engine, account_id: str, res: DayResult, day_status: str,
             position_value = Decimal(str(w)) * v.nav
             conn.execute(schema.position_day.insert().values(
                 account_id=account_id, date=v.date, code=code, lots=n,
-                close=float(position_value / (n * 1000)), value=position_value, weight=w,
+                close=float(position_value / (n * lot_size)), value=position_value, weight=w,
                 overweight_days=s.overweight_days.get(code, 0)))
         order_ids = {}
         if res.fills:
@@ -163,7 +164,7 @@ def settle(engine: Engine, account_id: str, trade_date: date, rules: Rules,
               level="error")
     res = run_day(prev.state, trade_date, orders, vwaps, closes, rules, applied=applied,
                   cash_dividends_per_share=_dividends(engine, trade_date, prev.last_date), warning=warning)
-    save_day(engine, account_id, res, "applied" if applied else "voided")
+    save_day(engine, account_id, res, "applied" if applied else "voided", lot_size=rules.lot_size)
     return res
 
 
@@ -182,12 +183,12 @@ def reconcile(engine: Engine, account_id: str, trade_date: date, organizer_nav: 
                      cash_dividends_per_share=divs, warning=True)
     tol = tolerance if tolerance is not None else Decimal(20000) + applied.valuation.nav * Decimal("0.00001")
     if abs(applied.valuation.nav - organizer_nav) <= tol:
-        save_day(engine, account_id, applied, "applied", organizer_nav)
+        save_day(engine, account_id, applied, "applied", organizer_nav, lot_size=rules.lot_size)
         return "applied"
     if orders and abs(voided.valuation.nav - organizer_nav) <= tol:
-        save_day(engine, account_id, voided, "voided", organizer_nav)
+        save_day(engine, account_id, voided, "voided", organizer_nav, lot_size=rules.lot_size)
         return "voided"
-    save_day(engine, account_id, applied, "unreconciled", organizer_nav)
+    save_day(engine, account_id, applied, "unreconciled", organizer_nav, lot_size=rules.lot_size)
     return "unreconciled"
 
 

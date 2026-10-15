@@ -25,6 +25,8 @@ dependencies = [
     "pyarrow>=15",
     "scikit-learn>=1.4",
     "apscheduler>=3.10,<4",
+    "fastapi>=0.110",
+    "uvicorn>=0.29",
 ]
 
 [project.optional-dependencies]
@@ -39,7 +41,7 @@ sm = "stockmaster.cli:app"
 where = ["src"]
 
 [tool.setuptools.package-data]
-stockmaster = ["agent/prompts/**/*.md", "reporting/templates/*"]
+stockmaster = ["agent/prompts/**/*.md", "reporting/templates/*", "monitor/static/*"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

@@ -1,0 +1,54 @@
+# Simulated retail account: NT$5,000 trading any TWSE/TPEx stock or ETF in odd lots (零股).
+# SIMULATED ONLY - no order ever reaches a broker. Every number below is an explicit assumption;
+# change it here, not in code. Fills, fees and the universe filters decide whether a small account
+# can make money at all, so read them before reading any result.
+account_id: retail_5k
+initial_cash: 5000
+start_date: 2026-10-19          # first trading day of the account (Monday)
+lot_size: 1                     # odd lots: orders are in single shares
+price_limit_pct: 0.10           # TWSE/TPEx daily limit, used for worst-case cash checks
+
+fees:
+  commission_rate: 0.001425     # 0.1425% each side, no broker discount assumed
+  # Many brokers charge NT$20 minimum per order; several charge NT$1 for online odd-lot orders.
+  # NT$20 is the conservative default: on a NT$1,500 order it is 1.3% of the trade.
+  # Set this to YOUR broker's minimum before trusting any result.
+  min_commission: 20
+  sell_tax_rate: 0.003          # 證交稅 on stock sells
+  etf_sell_tax_rate: 0.001      # 證交稅 on ETF sells
+  rounding: floor
+
+fill:
+  # Paper fills: the trading day's VWAP of board-lot trades, worsened by slippage. Odd lots match in
+  # their own (thinner) intraday auction, so VWAP alone would flatter the account.
+  price: vwap
+  slippage_bps: 20              # buys fill 0.20% above VWAP, sells 0.20% below
+
+universe:                       # rebuilt every day from all listed securities in the database
+  markets: [TWSE, TPEx]
+  include_etfs: true
+  min_price: 5.0                # NT$; excludes penny stocks
+  min_adv20_ntd: 20000000       # 20-day average traded value >= NT$20m (liquidity)
+  min_history_days: 60          # trading days of prices (new listings excluded)
+  # leveraged / inverse / futures-based ETFs are excluded (warrants are already excluded by code)
+  exclude_name_keywords: ["正2", "反1", "反向", "槓桿", "期貨"]
+
+portfolio:
+  max_positions: 3
+  max_weight: 0.60              # of NAV at reference prices, per position
+  min_order_ntd: 1500           # smaller orders are skipped (fee drag)
+  cash_buffer_pct: 0.03         # kept uninvested for fees and limit-up fills
+  min_hold_days: 5              # trading days a new position is held before a discretionary sell
+  max_orders_per_day: 3
+  candidates_for_llm: 25        # top-scored eligible names shown to the model
+
+weight_caps:
+  default: 0.60
+
+benchmark: "0050"               # buy-and-hold comparison with the same cash, fees and fills
+
+llm:
+  chain: ""                     # provider:model list; empty = LLM_CHAIN / NVIDIA_MODEL defaults
+  temperature: 0.2
+  max_repair_rounds: 1
+  max_tokens: 4000

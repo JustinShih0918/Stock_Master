@@ -44,3 +44,27 @@ def parse_isin_html(raw: bytes | str) -> list[dict]:
                     "market": MARKETS.get(market.strip(), market.strip()), "type": typ.strip(),
                     "industry": industry.strip() or None, "listed": listed.strip(), "cfi": cfi.strip()})
     return out
+
+
+# The class query above returns nothing for TPEx; the per-market listing page covers it.
+MODE_URL = "https://isin.twse.com.tw/isin/C_public.jsp"
+MODES = {"TWSE": "2", "TPEx": "4"}
+
+
+def parse_mode_html(raw: bytes | str) -> list[dict]:
+    """C_public.jsp rows: '代號　名稱' | ISIN | 上市日 | 市場別 | 產業別 | CFICode | 備註, with section
+    header rows ('股票', 'ETF', ...) that set the security type of the rows below them."""
+    html = decode(raw) if isinstance(raw, bytes) else raw
+    out, section = [], ""
+    for tr in _ROW.findall(html):
+        cells = [strip_html(c) for c in _CELL.findall(tr)]
+        if len(cells) == 1:
+            section = cells[0].strip()
+            continue
+        if len(cells) < 6 or "　" not in cells[0]:
+            continue
+        code, _, name = cells[0].partition("　")
+        out.append({"code": code.strip(), "name": name.strip(), "isin": cells[1].strip(),
+                    "market": MARKETS.get(cells[3].strip(), cells[3].strip()), "type": section,
+                    "industry": cells[4].strip() or None, "listed": cells[2].strip(), "cfi": cells[5].strip()})
+    return out

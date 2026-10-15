@@ -8,8 +8,8 @@ fill, submission, ledger_day, position_day, warning_event).
 
 from __future__ import annotations
 
-from sqlalchemy import (JSON, BigInteger, Boolean, Column, Date, DateTime, Float, ForeignKey,
-                        Integer, MetaData, Numeric, String, Table, Text, UniqueConstraint, text)
+from sqlalchemy import (JSON, BigInteger, Boolean, Column, Date, DateTime, Float, ForeignKey, func,
+                        Integer, MetaData, Numeric, String, Table, Text, UniqueConstraint)
 from sqlalchemy.dialects import postgresql
 from sqlalchemy.types import Uuid
 
@@ -22,8 +22,10 @@ NAMING = {
 metadata = MetaData(naming_convention=NAMING)
 
 JSONB = postgresql.JSONB(astext_type=Text()).with_variant(JSON(), "sqlite")
+# BIGSERIAL in Postgres; SQLite (tests, local smoke runs) auto-increments only INTEGER primary keys.
+ID = BigInteger().with_variant(Integer(), "sqlite")
 MONEY = Numeric(20, 4)
-NOW = text("now()")
+NOW = func.now()  # now() in Postgres, CURRENT_TIMESTAMP in SQLite
 
 
 def _fetch_fk() -> Column:
@@ -101,7 +103,7 @@ run = Table(
 
 source_fetch = Table(
     "source_fetch", metadata,
-    Column("id", BigInteger, primary_key=True, autoincrement=True),
+    Column("id", ID, primary_key=True, autoincrement=True),
     Column("source", String(32), nullable=False),
     Column("endpoint", Text, nullable=False),
     Column("params", JSONB),
@@ -276,7 +278,7 @@ valuation_daily = Table(
 
 decision = Table(
     "decision", metadata,
-    Column("id", BigInteger, primary_key=True, autoincrement=True),
+    Column("id", ID, primary_key=True, autoincrement=True),
     Column("run_id", Uuid, ForeignKey("run.run_id"), nullable=False),
     Column("trade_date", Date, nullable=False),
     Column("stage", String(16), nullable=False),
@@ -307,7 +309,7 @@ ledger_day = Table(
 
 llm_call = Table(
     "llm_call", metadata,
-    Column("id", BigInteger, primary_key=True, autoincrement=True),
+    Column("id", ID, primary_key=True, autoincrement=True),
     Column("run_id", Uuid, ForeignKey("run.run_id"), nullable=False),
     Column("seq", Integer, nullable=False),
     Column("provider", String(32), nullable=False),
@@ -337,7 +339,7 @@ position_day = Table(
 
 warning_event = Table(
     "warning_event", metadata,
-    Column("id", BigInteger, primary_key=True, autoincrement=True),
+    Column("id", ID, primary_key=True, autoincrement=True),
     Column("account_id", String(48), ForeignKey("account.id"), nullable=False),
     Column("date", Date, nullable=False),
     Column("rule_id", String(32), nullable=False),
@@ -348,7 +350,7 @@ warning_event = Table(
 # ``order`` is an SQL keyword; the Python name carries a trailing underscore.
 order_ = Table(
     "order", metadata,
-    Column("id", BigInteger, primary_key=True, autoincrement=True),
+    Column("id", ID, primary_key=True, autoincrement=True),
     Column("decision_id", BigInteger, ForeignKey("decision.id"), nullable=False),
     Column("account_id", String(48), ForeignKey("account.id"), nullable=False),
     Column("trade_date", Date, nullable=False),
@@ -362,7 +364,7 @@ order_ = Table(
 
 submission = Table(
     "submission", metadata,
-    Column("id", BigInteger, primary_key=True, autoincrement=True),
+    Column("id", ID, primary_key=True, autoincrement=True),
     Column("account_id", String(48), nullable=False),
     Column("trade_date", Date, nullable=False),
     Column("seq", Integer, nullable=False),
@@ -378,7 +380,7 @@ submission = Table(
 
 tool_call = Table(
     "tool_call", metadata,
-    Column("id", BigInteger, primary_key=True, autoincrement=True),
+    Column("id", ID, primary_key=True, autoincrement=True),
     Column("run_id", Uuid, ForeignKey("run.run_id"), nullable=False),
     Column("llm_call_id", BigInteger, ForeignKey("llm_call.id")),
     Column("name", String(64), nullable=False),
@@ -391,7 +393,7 @@ tool_call = Table(
 
 validation = Table(
     "validation", metadata,
-    Column("id", BigInteger, primary_key=True, autoincrement=True),
+    Column("id", ID, primary_key=True, autoincrement=True),
     Column("decision_id", BigInteger, ForeignKey("decision.id"), nullable=False),
     Column("rule_id", String(32), nullable=False),
     Column("severity", String(8), nullable=False),
@@ -403,7 +405,7 @@ validation = Table(
 
 fill = Table(
     "fill", metadata,
-    Column("id", BigInteger, primary_key=True, autoincrement=True),
+    Column("id", ID, primary_key=True, autoincrement=True),
     Column("order_id", BigInteger, ForeignKey("order.id"), nullable=False),
     Column("account_id", String(48), ForeignKey("account.id"), nullable=False),
     Column("date", Date, nullable=False),

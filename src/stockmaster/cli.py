@@ -371,5 +371,34 @@ def collect() -> None:
     sched.start()
 
 
+@app.command()
+def monitor(host: str = typer.Option("0.0.0.0"), port: int = typer.Option(8080)) -> None:
+    """Serve the read-only monitor dashboard (P&L, holdings, AI decisions, data health)."""
+    from stockmaster.monitor.app import serve
+    serve(host, port)
+
+
+@app.command("retail-decide")
+def retail_decide(trade_date: str = typer.Option(None, help="YYYY-MM-DD; default next trading day"),
+                  no_llm: bool = typer.Option(False), slot: str = typer.Option("manual")) -> None:
+    """Run the NT$5,000 whole-market retail account's decision (simulated)."""
+    from stockmaster.data.store import get_engine
+    from stockmaster.retail.pipeline import run_retail_decision
+    out = run_retail_decision(get_engine(), trade_date=_date(trade_date) if trade_date else None, slot=slot,
+                              use_llm=not no_llm)
+    f = out.final
+    typer.echo(f"{f.trade_date} source={f.decision_source} orders={[(o.side, o.code, o.shares) for o in f.orders]} "
+               f"final={out.is_final} report={out.artifacts.report_md}")
+
+
+@app.command("retail-settle")
+def retail_settle(on: str = typer.Option(None, "--date")) -> None:
+    """Fill the retail account's final orders at VWAP +/- slippage and value it at the close."""
+    from stockmaster.data.store import get_engine
+    from stockmaster.retail.pipeline import settle_retail
+    r = settle_retail(get_engine(), _date(on))
+    typer.echo("before start date" if r is None else f"NAV={r.valuation.nav:,.2f} holdings={r.state.lots}")
+
+
 if __name__ == "__main__":
     app()
