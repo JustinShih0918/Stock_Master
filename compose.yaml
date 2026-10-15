@@ -1,0 +1,70 @@
+services:
+  dev:
+    build:
+      context: .
+      args:
+        DEV_UID: ${LOCAL_UID:-1000}
+        DEV_GID: ${LOCAL_GID:-1000}
+    init: true
+    stdin_open: true
+    tty: true
+    working_dir: /workspace
+    command: ["sleep", "infinity"]
+    volumes:
+      - .:/workspace
+      - claude-config:/home/stock/.claude
+      - npm-cache:/home/stock/.npm
+    environment:
+      TZ: Asia/Taipei
+      DATABASE_URL: postgresql://${POSTGRES_USER:-stock_master}:${POSTGRES_PASSWORD:-stock_master_dev}@db:5432/${POSTGRES_DB:-stock_master}
+      NVIDIA_API_KEY: ${NVIDIA_API_KEY:-}
+      NVIDIA_BASE_URL: ${NVIDIA_BASE_URL:-https://integrate.api.nvidia.com/v1}
+      NVIDIA_MODEL: ${NVIDIA_MODEL:-}
+    depends_on:
+      db:
+        condition: service_healthy
+
+  scheduler:
+    # Unattended daily jobs (ingest, ETF snapshots, decisions, settlement). Start explicitly:
+    #   docker compose --profile ops up -d scheduler
+    profiles: ["ops"]
+    build:
+      context: .
+      args:
+        DEV_UID: ${LOCAL_UID:-1000}
+        DEV_GID: ${LOCAL_GID:-1000}
+    init: true
+    restart: unless-stopped
+    working_dir: /workspace
+    command: ["/workspace/.venv/bin/sm", "collect"]
+    volumes:
+      - .:/workspace
+    environment:
+      TZ: Asia/Taipei
+      DATABASE_URL: postgresql://${POSTGRES_USER:-stock_master}:${POSTGRES_PASSWORD:-stock_master_dev}@db:5432/${POSTGRES_DB:-stock_master}
+    depends_on:
+      db:
+        condition: service_healthy
+
+  db:
+    image: postgres:17
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-stock_master}
+      POSTGRES_USER: ${POSTGRES_USER:-stock_master}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-stock_master_dev}
+      TZ: Asia/Taipei
+    ports:
+      - "127.0.0.1:${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-stock_master} -d ${POSTGRES_DB:-stock_master}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  postgres-data:
+  claude-config:
+  npm-cache:

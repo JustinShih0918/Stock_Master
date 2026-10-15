@@ -1,0 +1,421 @@
+<style>
+    .md-DISPLAY-B{
+        min-width: 10em;
+    }
+    .DownloadPCF{
+        width: 1.3em;
+    }
+    .bootstrap-datepicker {
+        display: flex;
+        align-items: center;
+        gap: 1%; /* 間距依需求調整 */
+    }
+    .bootstrap-datepicker a {
+        display: inline-flex;
+        width: 59px;
+        font-family: "Microsoft JhengHei";
+        font-size: 14px;
+        font-weight: normal;
+        align-items: center;
+    }
+    .bootstrap-datepicker a .DownloadPCF {
+        margin-left: 4px;
+    }
+    .bootstrap-datepicker-input {
+        display: flex;
+        align-items: center;
+    }
+</style>
+<div class="FundOverviewDiv">
+<input id="DataDate" name="DataDate" type="hidden" value="2026/10/02" /><input id="StartDate" name="StartDate" type="hidden" value="" /><input data-val="true" data-val-required="The PageSize field is required." id="PageSize" name="PageSize" type="hidden" value="10" />            <div class="border-G bg-fff marginB-100r md-border-N">
+                <div class="RedemptionDiv-title padding-100r md-paddingL-0">
+                    <p class="fontS-125r fontW-600 textC-blue2 md-paddingL-100r showfund" data-fundid="J024">&#x4E3B;&#x52D5;&#x51F1;&#x57FA;&#x53F0;&#x7063;(00407A)</p>
+                    <div class="md-display-N">
+                        <a href="#" onclick="SetCommonlyETFCookie('J024',2)" class="paddingLR-050r removeHot">移除常用<i class="fas fa-minus marginL-050r"></i></a>
+                        <a href="#" onclick="SetCommonlyETFCookie('J024',1)" class="paddingLR-050r addHot">加入常用<i class="fas fa-plus marginL-050r"></i></a>
+                    </div>
+                </div>
+                <div class="RedemptionDiv-label padding-100r md-paddingLR-0">
+                    <div class="md-DISPLAY-B md-textA-C">
+                        <p class="textC-blue">2026/10/02 </p>
+                        <p class="textC-blue">現金申購買回清單公告</p>
+                    </div>
+
+                    <div class="bootstrap-datepicker">
+                        <a href="/Fund/DownLoadRedemptionExcel?fundID=J024&amp;queryDate=10%2F02%2F2026%2000%3A00%3A00" class="textC-blue md-display-N">下載<img class="DownloadPCF" src="/images/DownloadPCF.png" alt="Download PCF" /></a>
+                        <span class="bootstrap-datepicker-input RedemptionList">
+                            <input type="text" class="form-control rounded-0" id="datepicker" value="2026/10/02">
+                        </span>
+
+                    </div>
+                </div>
+                <ul class="w-100 list-style-striped Redemption">
+                        <li class="paddingTB-125r paddingLR-175r md-paddingLR-050r">
+                            <span>&#x6BCF;&#x7533;&#x8CFC;&#x57FA;&#x6578;&#x4E4B;&#x9810;&#x6536;&#x7533;&#x8CFC;&#x7E3D;&#x50F9;&#x91D1;(&#x5143;)</span>
+                            <span>TWD$5,604,000</span>
+                        </li>
+                        <li class="paddingTB-125r paddingLR-175r md-paddingLR-050r">
+                            <span>&#x57FA;&#x91D1;&#x6DE8;&#x8CC7;&#x7522;&#x50F9;&#x503C;(&#x5143;)</span>
+                            <span>TWD$23,574,011,890</span>
+                        </li>
+                        <li class="paddingTB-125r paddingLR-175r md-paddingLR-050r">
+                            <span>&#x5DF2;&#x767C;&#x884C;&#x53D7;&#x76CA;&#x6B0A;&#x55AE;&#x4F4D;&#x7E3D;&#x6578;</span>
+                            <span>2,315,739,000</span>
+                        </li>
+                        <li class="paddingTB-125r paddingLR-175r md-paddingLR-050r">
+                            <span>&#x8207;&#x524D;&#x65E5;&#x5DF2;&#x767C;&#x884C;&#x55AE;&#x4F4D;&#x5DEE;&#x7570;&#x6578;</span>
+                            <span>-15,000,000</span>
+                        </li>
+                        <li class="paddingTB-125r paddingLR-175r md-paddingLR-050r">
+                            <span>(2026/10/01)&#x6BCF;&#x53D7;&#x76CA;&#x6B0A;&#x55AE;&#x4F4D;&#x6DE8;&#x8CC7;&#x7522;&#x50F9;&#x503C;(&#x5143;)</span>
+                            <span>TWD$10.18</span>
+                        </li>
+                        <li class="paddingTB-125r paddingLR-175r md-paddingLR-050r">
+                            <span>&#x6BCF;&#x73FE;&#x91D1;&#x7533;&#x8CFC;&#x55AE;&#x4F4D;&#x7D04;&#x7576;&#x5E02;&#x503C;(&#x5143;)</span>
+                            <span>TWD$5,089,944</span>
+                        </li>
+                        <li class="paddingTB-125r paddingLR-175r md-paddingLR-050r">
+                            <span>(2026/10/01)&#x6BCF;&#x57FA;&#x6578;&#x7533;&#x8CFC;&#x7E3D;&#x50F9;&#x91D1;&#x5DEE;&#x7570;&#x984D;(&#x5143;)</span>
+                            <span>TWD$-458,956</span>
+                        </li>
+                        <li class="paddingTB-125r paddingLR-175r md-paddingLR-050r">
+                            <span>(2026/10/01)&#x6BCF;&#x57FA;&#x6578;&#x5BE6;&#x969B;&#x7533;&#x8CFC;&#x7E3D;&#x50F9;&#x91D1;(&#x5143;)</span>
+                            <span>TWD$5,100,044</span>
+                        </li>
+                </ul>
+            </div>
+            <p class="fontS-075r marginB-225r">
+                *匯率:<br />
+                1 = 0TWD (2026/10/01)
+            </p>
+                <div class="redemption-rest">
+                    <h4 class="redemption-rest__sub-title">&#x80A1;&#x7968;</h4>
+
+                    <div class="responsive-table-wrap" style="margin-bottom:20px;">
+                        <table class="responsive-table responsive-table--md js-table-0">
+                            <thead>
+                                <tr>
+                                            <th style="text-align:center;width:calc(100% / 4)">&#x80A1;&#x7968;&#x4EE3;&#x865F;</th>
+                                            <th style="text-align:center;width:calc(100% / 4)">&#x80A1;&#x7968;&#x540D;&#x7A31;</th>
+                                            <th style="text-align:center;width:calc(100% / 4)">&#x80A1;&#x6578;</th>
+                                            <th style="text-align:center;width:calc(100% / 4)">&#x6B0A;&#x91CD;(%)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                            <tr name="content" style="">
+                                                        <td style="text-align:center">2330</td>
+                                                        <td style="text-align:center">&#x53F0;&#x7A4D;&#x96FB;</td>
+                                                        <td style="text-align:center">870,000</td>
+                                                        <td style="text-align:center">9.26</td>
+                                            </tr>
+                                            <tr name="content" style="">
+                                                        <td style="text-align:center">2454</td>
+                                                        <td style="text-align:center">&#x806F;&#x767C;&#x79D1;</td>
+                                                        <td style="text-align:center">282,000</td>
+                                                        <td style="text-align:center">5.96</td>
+                                            </tr>
+                                            <tr name="content" style="">
+                                                        <td style="text-align:center">3037  </td>
+                                                        <td style="text-align:center">&#x6B23;&#x8208;</td>
+                                                        <td style="text-align:center">1,150,000</td>
+                                                        <td style="text-align:center">5.93</td>
+                                            </tr>
+                                            <tr name="content" style="">
+                                                        <td style="text-align:center">3017  </td>
+                                                        <td style="text-align:center">&#x5947;&#x92D0;</td>
+                                                        <td style="text-align:center">393,000</td>
+                                                        <td style="text-align:center">5.85</td>
+                                            </tr>
+                                            <tr name="content" style="">
+                                                        <td style="text-align:center">2383</td>
+                                                        <td style="text-align:center">&#x53F0;&#x5149;&#x96FB;</td>
+                                                        <td style="text-align:center">236,000</td>
+                                                        <td style="text-align:center">4.98</td>
+                                            </tr>
+                                            <tr name="content" style="">
+                                                        <td style="text-align:center">3443  </td>
+                                                        <td style="text-align:center">&#x5275;&#x610F;&#x96FB;&#x5B50;</td>
+                                                        <td style="text-align:center">143,000</td>
+                                                        <td style="text-align:center">4.79</td>
+                                            </tr>
+                                            <tr name="content" style="">
+                                                        <td style="text-align:center">6669  </td>
+                                                        <td style="text-align:center">&#x7DEF;&#x7A4E;</td>
+                                                        <td style="text-align:center">418,644</td>
+                                                        <td style="text-align:center">3.75</td>
+                                            </tr>
+                                            <tr name="content" style="">
+                                                        <td style="text-align:center">6274  </td>
+                                                        <td style="text-align:center">&#x53F0;&#x71FF;</td>
+                                                        <td style="text-align:center">565,000</td>
+                                                        <td style="text-align:center">3.68</td>
+                                            </tr>
+                                            <tr name="content" style="">
+                                                        <td style="text-align:center">3653</td>
+                                                        <td style="text-align:center">&#x5065;&#x7B56;</td>
+                                                        <td style="text-align:center">122,000</td>
+                                                        <td style="text-align:center">3.56</td>
+                                            </tr>
+                                            <tr name="content" style="">
+                                                        <td style="text-align:center">3665  </td>
+                                                        <td style="text-align:center">&#x8CBF;&#x806F;-KY</td>
+                                                        <td style="text-align:center">291,000</td>
+                                                        <td style="text-align:center">3.15</td>
+                                            </tr>
+                                            <tr name="content" style="display:none">
+                                                        <td style="text-align:center">8046  </td>
+                                                        <td style="text-align:center">&#x5357;&#x96FB;</td>
+                                                        <td style="text-align:center">506,000</td>
+                                                        <td style="text-align:center">3.05</td>
+                                            </tr>
+                                            <tr name="content" style="display:none">
+                                                        <td style="text-align:center">3711  </td>
+                                                        <td style="text-align:center">&#x65E5;&#x6708;&#x5149;&#x6295;&#x63A7;</td>
+                                                        <td style="text-align:center">998,000</td>
+                                                        <td style="text-align:center">3.01</td>
+                                            </tr>
+                                            <tr name="content" style="display:none">
+                                                        <td style="text-align:center">2308</td>
+                                                        <td style="text-align:center">&#x53F0;&#x9054;&#x96FB;</td>
+                                                        <td style="text-align:center">339,000</td>
+                                                        <td style="text-align:center">2.74</td>
+                                            </tr>
+                                            <tr name="content" style="display:none">
+                                                        <td style="text-align:center">2059  </td>
+                                                        <td style="text-align:center">&#x5DDD;&#x6E56;</td>
+                                                        <td style="text-align:center">52,000</td>
+                                                        <td style="text-align:center">2.61</td>
+                                            </tr>
+                                            <tr name="content" style="display:none">
+                                                        <td style="text-align:center">6223  </td>
+                                                        <td style="text-align:center">&#x65FA;&#x77FD;</td>
+                                                        <td style="text-align:center">120,000</td>
+                                                        <td style="text-align:center">2.56</td>
+                                            </tr>
+                                            <tr name="content" style="display:none">
+                                                        <td style="text-align:center">2327  </td>
+                                                        <td style="text-align:center">&#x570B;&#x5DE8;*</td>
+                                                        <td style="text-align:center">939,000</td>
+                                                        <td style="text-align:center">2.40</td>
+                                            </tr>
+                                            <tr name="content" style="display:none">
+                                                        <td style="text-align:center">8996  </td>
+                                                        <td style="text-align:center">&#x9AD8;&#x529B;</td>
+                                                        <td style="text-align:center">324,000</td>
+                                                        <td style="text-align:center">2.15</td>
+                                            </tr>
+                                            <tr name="content" style="display:none">
+                                                        <td style="text-align:center">2345</td>
+                                                        <td style="text-align:center">&#x667A;&#x90A6;</td>
+                                                        <td style="text-align:center">252,000</td>
+                                                        <td style="text-align:center">2.03</td>
+                                            </tr>
+                                            <tr name="content" style="display:none">
+                                                        <td style="text-align:center">5274  </td>
+                                                        <td style="text-align:center">&#x4FE1;&#x9A4A;</td>
+                                                        <td style="text-align:center">22,900</td>
+                                                        <td style="text-align:center">1.85</td>
+                                            </tr>
+                                            <tr name="content" style="display:none">
+                                                        <td style="text-align:center">2301</td>
+                                                        <td style="text-align:center">&#x5149;&#x5BF6;&#x79D1;</td>
+                                                        <td style="text-align:center">1,216,000</td>
+                                                        <td style="text-align:center">1.47</td>
+                                            </tr>
+                                            <tr name="content" style="display:none">
+                                                        <td style="text-align:center">3008</td>
+                                                        <td style="text-align:center">&#x5927;&#x7ACB;&#x5149;</td>
+                                                        <td style="text-align:center">55,000</td>
+                                                        <td style="text-align:center">1.45</td>
+                                            </tr>
+                                            <tr name="content" style="display:none">
+                                                        <td style="text-align:center">6187  </td>
+                                                        <td style="text-align:center">&#x842C;&#x6F64;</td>
+                                                        <td style="text-align:center">267,000</td>
+                                                        <td style="text-align:center">1.44</td>
+                                            </tr>
+                                            <tr name="content" style="display:none">
+                                                        <td style="text-align:center">3081</td>
+                                                        <td style="text-align:center">&#x806F;&#x4E9E;</td>
+                                                        <td style="text-align:center">119,000</td>
+                                                        <td style="text-align:center">1.34</td>
+                                            </tr>
+                                            <tr name="content" style="display:none">
+                                                        <td style="text-align:center">6510  </td>
+                                                        <td style="text-align:center">&#x7CBE;&#x6E2C;</td>
+                                                        <td style="text-align:center">100,000</td>
+                                                        <td style="text-align:center">1.27</td>
+                                            </tr>
+                                            <tr name="content" style="display:none">
+                                                        <td style="text-align:center">6805  </td>
+                                                        <td style="text-align:center">&#x5BCC;&#x4E16;&#x9054;</td>
+                                                        <td style="text-align:center">117,000</td>
+                                                        <td style="text-align:center">1.19</td>
+                                            </tr>
+                                            <tr name="content" style="display:none">
+                                                        <td style="text-align:center">1560  </td>
+                                                        <td style="text-align:center">&#x4E2D;&#x7802;</td>
+                                                        <td style="text-align:center">255,000</td>
+                                                        <td style="text-align:center">1.08</td>
+                                            </tr>
+                                            <tr name="content" style="display:none">
+                                                        <td style="text-align:center">2408  </td>
+                                                        <td style="text-align:center">&#x5357;&#x4E9E;&#x79D1;</td>
+                                                        <td style="text-align:center">447,000</td>
+                                                        <td style="text-align:center">0.98</td>
+                                            </tr>
+                                            <tr name="content" style="display:none">
+                                                        <td style="text-align:center">2360</td>
+                                                        <td style="text-align:center">&#x81F4;&#x8302;</td>
+                                                        <td style="text-align:center">110,000</td>
+                                                        <td style="text-align:center">0.97</td>
+                                            </tr>
+                                            <tr name="content" style="display:none">
+                                                        <td style="text-align:center">4958</td>
+                                                        <td style="text-align:center">&#x81FB;&#x9F0E;-KY</td>
+                                                        <td style="text-align:center">438,000</td>
+                                                        <td style="text-align:center">0.95</td>
+                                            </tr>
+                                            <tr name="content" style="display:none">
+                                                        <td style="text-align:center">3491</td>
+                                                        <td style="text-align:center">&#x6607;&#x9054;&#x79D1;</td>
+                                                        <td style="text-align:center">142,000</td>
+                                                        <td style="text-align:center">0.90</td>
+                                            </tr>
+                                            <tr name="content" style="display:none">
+                                                        <td style="text-align:center">3131  </td>
+                                                        <td style="text-align:center">&#x5F18;&#x5851;</td>
+                                                        <td style="text-align:center">84,000</td>
+                                                        <td style="text-align:center">0.85</td>
+                                            </tr>
+                                            <tr name="content" style="display:none">
+                                                        <td style="text-align:center">1303</td>
+                                                        <td style="text-align:center">&#x5357;&#x4E9E;</td>
+                                                        <td style="text-align:center">729,000</td>
+                                                        <td style="text-align:center">0.79</td>
+                                            </tr>
+                                            <tr name="content" style="display:none">
+                                                        <td style="text-align:center">3034</td>
+                                                        <td style="text-align:center">&#x806F;&#x8A60;</td>
+                                                        <td style="text-align:center">317,000</td>
+                                                        <td style="text-align:center">0.74</td>
+                                            </tr>
+                                            <tr name="content" style="display:none">
+                                                        <td style="text-align:center">3231</td>
+                                                        <td style="text-align:center">&#x7DEF;&#x5275;</td>
+                                                        <td style="text-align:center">921,000</td>
+                                                        <td style="text-align:center">0.74</td>
+                                            </tr>
+                                            <tr name="content" style="display:none">
+                                                        <td style="text-align:center">3529  </td>
+                                                        <td style="text-align:center">&#x529B;&#x65FA;</td>
+                                                        <td style="text-align:center">50,000</td>
+                                                        <td style="text-align:center">0.69</td>
+                                            </tr>
+                                            <tr name="content" style="display:none">
+                                                        <td style="text-align:center">2615  </td>
+                                                        <td style="text-align:center">&#x842C;&#x6D77;</td>
+                                                        <td style="text-align:center">1,415,000</td>
+                                                        <td style="text-align:center">0.68</td>
+                                            </tr>
+                                            <tr name="content" style="display:none">
+                                                        <td style="text-align:center">2303  </td>
+                                                        <td style="text-align:center">&#x806F;&#x96FB;</td>
+                                                        <td style="text-align:center">921,000</td>
+                                                        <td style="text-align:center">0.63</td>
+                                            </tr>
+                                            <tr name="content" style="display:none">
+                                                        <td style="text-align:center">3293</td>
+                                                        <td style="text-align:center">&#x920A;&#x8C61;</td>
+                                                        <td style="text-align:center">179,000</td>
+                                                        <td style="text-align:center">0.62</td>
+                                            </tr>
+                                            <tr name="content" style="display:none">
+                                                        <td style="text-align:center">2368</td>
+                                                        <td style="text-align:center">&#x91D1;&#x50CF;&#x96FB;</td>
+                                                        <td style="text-align:center">119,000</td>
+                                                        <td style="text-align:center">0.55</td>
+                                            </tr>
+                                            <tr name="content" style="display:none">
+                                                        <td style="text-align:center">2451</td>
+                                                        <td style="text-align:center">&#x5275;&#x898B;</td>
+                                                        <td style="text-align:center">264,000</td>
+                                                        <td style="text-align:center">0.32</td>
+                                            </tr>
+                                            <tr name="content" style="display:none">
+                                                        <td style="text-align:center">5289</td>
+                                                        <td style="text-align:center">&#x5B9C;&#x9F0E;</td>
+                                                        <td style="text-align:center">58,294</td>
+                                                        <td style="text-align:center">0.32</td>
+                                            </tr>
+                                            <tr name="content" style="display:none">
+                                                        <td style="text-align:center">6531  </td>
+                                                        <td style="text-align:center">&#x611B;&#x666E;*</td>
+                                                        <td style="text-align:center">81,000</td>
+                                                        <td style="text-align:center">0.32</td>
+                                            </tr>
+                                            <tr name="content" style="display:none">
+                                                        <td style="text-align:center">8299</td>
+                                                        <td style="text-align:center">&#x7FA4;&#x806F;</td>
+                                                        <td style="text-align:center">36,000</td>
+                                                        <td style="text-align:center">0.32</td>
+                                            </tr>
+                                            <tr name="content" style="display:none">
+                                                        <td style="text-align:center">6446  </td>
+                                                        <td style="text-align:center">&#x85E5;&#x83EF;&#x85E5;</td>
+                                                        <td style="text-align:center">62,000</td>
+                                                        <td style="text-align:center">0.31</td>
+                                            </tr>
+                                            <tr name="content" style="display:none">
+                                                        <td style="text-align:center">3260</td>
+                                                        <td style="text-align:center">&#x5A01;&#x525B;</td>
+                                                        <td style="text-align:center">176,000</td>
+                                                        <td style="text-align:center">0.28</td>
+                                            </tr>
+                                            <tr name="content" style="display:none">
+                                                        <td style="text-align:center">2379</td>
+                                                        <td style="text-align:center">&#x745E;&#x6631;</td>
+                                                        <td style="text-align:center">72,000</td>
+                                                        <td style="text-align:center">0.23</td>
+                                            </tr>
+                                            <tr name="content" style="display:none">
+                                                        <td style="text-align:center">5434</td>
+                                                        <td style="text-align:center">&#x5D07;&#x8D8A;</td>
+                                                        <td style="text-align:center">87,000</td>
+                                                        <td style="text-align:center">0.21</td>
+                                            </tr>
+                                            <tr name="content" style="display:none">
+                                                        <td style="text-align:center">2344  </td>
+                                                        <td style="text-align:center">&#x83EF;&#x90A6;&#x96FB;</td>
+                                                        <td style="text-align:center">187,000</td>
+                                                        <td style="text-align:center">0.14</td>
+                                            </tr>
+                                            <tr name="content" style="display:none">
+                                                        <td style="text-align:center">1590</td>
+                                                        <td style="text-align:center">&#x4E9E;&#x5FB7;&#x5BA2;-KY</td>
+                                                        <td style="text-align:center">13,000</td>
+                                                        <td style="text-align:center">0.07</td>
+                                            </tr>
+                                            <tr name="content" style="display:none">
+                                                        <td style="text-align:center">2412</td>
+                                                        <td style="text-align:center">&#x4E2D;&#x83EF;&#x96FB;</td>
+                                                        <td style="text-align:center">67,000</td>
+                                                        <td style="text-align:center">0.04</td>
+                                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="marginB-225r">
+                    <a href="javascript:void(0)" onclick="SetMoreBtnClickEvent('.js-table-0', '#tableMoreBtn-0')" id="tableMoreBtn-0" class="btn-more" ><span>看更多</span><i class="fa fa-chevron-down"></i></a>
+                </div>
+            <p class="fontS-075r marginB-225r">&nbsp; </p>
+</div>
+<script>
+    //針對IE11 日曆點選不到的問題
+    $(document).ready(function () {
+        $('.bootstrap-datepicker-input').click(function () {
+            $(this).find('input').focus();
+        })
+    })
+</script>

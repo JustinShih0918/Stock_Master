@@ -1,0 +1,94 @@
+# Internal risk buffers and strategy knobs. These are stricter than the official rules on purpose.
+strategy_version: "2026.10.1"
+
+buffers:
+  # Max weight for a name we are BUYING, at reference prices. Chosen so the name stays under the
+  # official cap even if it closes limit-up while the rest of the portfolio falls 3% and our other
+  # fills are 1% adverse (see risk.stress.stressed_weight).
+  add_cap_default: 0.0875
+  add_cap_overrides:
+    "2330": 0.22
+  # Names that drifted over the cap are trimmed back to these weights.
+  drift_trim_target_default: 0.09
+  drift_trim_target_overrides:
+    "2330": 0.22
+  drift_trim_by_grace_day: 2      # trim no later than the 2nd trading day of overweight
+  stress_up: 0.10                 # buys fill at limit-up in the worst case
+  stress_down: 0.10               # sells fill at limit-down in the worst case
+  stress_rest_of_portfolio: -0.03
+  stress_fill_premium: 0.01       # adverse VWAP vs reference close, used with the weight stress
+  cash_min_worst: 0.005           # worst-case end-of-day cash >= 0.5% of NAV
+  cash_max_worst: 0.24            # worst-case end-of-day cash < 24% of NAV
+  cash_target_min: 0.01
+  cash_target_max: 0.08
+  day1_invest_target: 0.87        # all-cash start: 832.5M-907.8M is the feasible band
+  holdings_target_min: 22
+  holdings_target_max: 26
+  min_position_weight: 0.0075
+  active_share_target: 0.30
+  active_share_hard_floor: 0.25
+  active_share_emergency: 0.35
+  # Organizer: "若當日結算發生現金部位為負值" -> cash is settled end of day, so sell proceeds count.
+  sell_proceeds_fund_buys: true
+
+alpha:
+  # Composite factor weights (positive = higher is better). v2, 2026-10-02: raised 投信 20-day buying
+  # (the only signal with positive 10d rank-IC in both halves of 2026-03..10: t=2.0 and 2.3) and cut
+  # momentum (flat in H1, IC -0.07..-0.10 in H2). v1 (code default) kept in alpha/composite.py.
+  weights:
+    itrust_5d: 0.12
+    itrust_20d: 0.22
+    foreign_5d: 0.05
+    rev_accel: 0.12
+    rev_yoy_3m: 0.08
+    rev_new_high_12m: 0.05
+    mom_6m_skip1w: 0.04
+    dist_52w_high: 0.04
+    ret_5d: -0.05
+    margin_chg_5d: -0.05
+    earnings_yield: 0.05
+    vol_60d: -0.05
+
+turnover:
+  no_trade_band: 0.005            # skip |dw| below 0.5% of NAV
+  daily_budget: 0.06              # soft, one-way
+  event_day_budget: 0.15
+  freeze_last_days: 5
+  swap_alpha_cost_multiple: 1.5
+  # Hysteresis (compsim 2026-10-02: full daily rebalancing turned over ~10% of NAV/day and cost
+  # 1.5-1.9% of NAV per 24-day window, which erased the composite's edge over TAIEX).
+  rebalance_speed: 0.35           # move 35% of the way to the baseline target each day
+  exit_rank: 60                   # keep a holding until its score rank falls below 60
+
+llm:
+  deviation_budget: 0.35          # soft cap on sum |w_llm - w_baseline|
+  max_tool_calls: 15
+  max_check_calls: 4
+  max_repair_rounds: 2
+  temperature: 0.2
+  # Tried in order after NVIDIA_MODEL (when LLM_CHAIN is unset). Probe of 2026-10-02 on the real
+  # first request: kimi-k3 5/5 19s, glm-5.3-flash 5/5 53s, deepseek-v4.1-flash 5/5 118s,
+  # nemotron-3-super 5/5 2s (weaker instruction following), nemotron-3-ultra 3/5 (HTTP 500 bursts).
+  # kimi-k2.6 is listed in the catalog but returns 404. Re-rank with `sm bakeoff`.
+  fallback_models:
+    - nvidia:moonshotai/kimi-k3
+    - nvidia:z-ai/glm-5.3-flash
+    - nvidia:deepseek-ai/deepseek-v4.1-flash
+    - nvidia:nvidia/nemotron-3-super-120b-a12b
+
+risk_levels:
+  defensive:
+    core_names: 9
+    core_weight: 0.055
+    tsmc_weight: 0.18
+    beta_target: 0.9
+  normal:
+    core_names: 8
+    core_weight: 0.07
+    tsmc_weight: 0.20
+    beta_target: 1.0
+  aggressive:
+    core_names: 8
+    core_weight: 0.0875
+    tsmc_weight: 0.22
+    beta_target: 1.15

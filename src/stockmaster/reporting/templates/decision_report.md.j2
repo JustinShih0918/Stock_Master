@@ -1,0 +1,73 @@
+# Agent 決策報告 — {{ f.trade_date }}
+
+| 項目 | 內容 |
+|---|---|
+| 交易日 | {{ f.trade_date }} |
+| 資料截至 | {{ f.provenance.data_as_of }} 收盤 |
+| 決策來源 | {{ source_label }} |
+| 模型 | {{ f.provenance.provider or "—" }} / {{ f.provenance.model_id or "量化基準（無 LLM）" }} |
+| 市場狀態 / 風險等級 | {{ f.regime }} / {{ f.risk_level }} |
+| 報告產生時間 | {{ generated_at }} |
+
+## 一、市場觀點
+{{ f.market_view }}
+
+## 二、今日交易摘要
+- 委託筆數：買進 {{ n_buy }} 筆、賣出 {{ n_sell }} 筆
+- 預估單邊週轉率：{{ pct(f.post_trade.turnover_one_way) }}；預估交易成本：NT$ {{ money(f.post_trade.est_cost) }}
+- 交易後持股檔數：{{ f.post_trade.n_holdings }}；交易後現金比率（參考價）：{{ pct(f.post_trade.cash_ref_pct) }}
+
+## 三、交易明細
+{% if f.orders %}
+| 代號 | 名稱 | 買賣 | 張數 | 參考價 | 預估金額 | 理由 |
+|---|---|---|---:|---:|---:|---|
+{% for o in f.orders -%}
+| {{ o.code }} | {{ o.name }} | {{ "買進" if o.side == "buy" else "賣出" }} | {{ o.lots }} | {{ "%.2f"|format(o.ref_price) }} | {{ money(o.est_amount) }} | {{ o.rationale }} |
+{% endfor %}
+{% else %}
+今日無交易，維持現有投資組合。
+{% endif %}
+
+## 四、交易後目標投資組合
+| 代號 | 名稱 | 張數 | 交易後權重 | 信心 | 持有理由 |
+|---|---|---:|---:|:---:|---|
+{% for t in f.targets -%}
+| {{ t.code }} | {{ t.name }} | {{ t.lots_after }} | {{ pct(t.weight_after_ref) }} | {{ t.conviction or "—" }} | {{ t.rationale or "—" }} |
+{% endfor %}
+
+{% if f.exits %}
+### 出清
+{% for e in f.exits -%}
+- {{ e.code }}：{{ e.rationale }}
+{% endfor %}
+{% endif %}
+
+## 五、風險控管
+- 最差情境現金（買進以漲停價、賣出以跌停價成交）：{{ pct(f.post_trade.worst_cash_min_pct) }} 淨值
+{% if f.post_trade.halted_sell_cash_min_pct is defined %}- 最大一筆賣單因停牌未成交時的最差現金：{{ pct(f.post_trade.halted_sell_cash_min_pct) }} 淨值（規則 ≥ 0）
+{% endif %}- 最差情境現金比率上限檢查：{{ pct(f.post_trade.worst_cash_max_ratio) }}（規則 < 25%）
+- Active Share 最低值：{{ pct(f.post_trade.active_share_min) }}{% if f.post_trade.active_share_binding_etf %}（相對 {{ f.post_trade.active_share_binding_etf }}）{% endif %}（規則 ≥ 20%）
+
+{{ f.risk_notes }}
+
+| 規則 | 嚴重度 | 結果 | 實測 | 限制 | 說明 |
+|---|---|:---:|---:|---:|---|
+{% for c in f.checks -%}
+| {{ c.rule_id }} | {{ c.severity }} | {{ "✔" if c.passed else "✘" }} | {{ num(c.measured) }} | {{ num(c.limit) }} | {{ c.detail if not c.passed or c.rule_id in ("R_ACTIVE_SHARE", "R_DEVIATION") else "" }} |
+{% endfor %}
+
+{% if f.repair_notes %}
+### 風控調整紀錄
+{% for n in f.repair_notes -%}
+- {{ n }}
+{% endfor %}
+{% endif %}
+
+## 六、資料與模型紀錄
+- run_id：{{ f.provenance.run_id }}；帳戶：{{ f.provenance.account_id }}
+- 策略版本：{{ f.provenance.strategy_version }}；Prompt 版本：{{ f.provenance.prompt_version or "—" }}；程式版本：{{ f.provenance.git_sha or "—" }}
+- 輸入資料雜湊：{{ f.provenance.input_sha256 }}
+- LLM 嘗試紀錄：{{ f.provenance.llm_attempts | join("；") if f.provenance.llm_attempts else "—" }}
+{% if f.stale_inputs %}- ⚠ 過時或缺漏資料：{{ f.stale_inputs | join("、") }}{% endif %}
+
+- 決策雜湊（交易書與本報告共用）：{{ sha }}

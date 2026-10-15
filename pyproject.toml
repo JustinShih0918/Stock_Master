@@ -1,0 +1,47 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "stockmaster"
+version = "0.1.0"
+description = "Taiwan stock paper-trading research system and AI-agent fund manager (E.SUN AI Challenge 2026)."
+requires-python = ">=3.12"
+dependencies = [
+    "pandas>=2.2",
+    "numpy>=1.26",
+    "scipy>=1.11",
+    "pydantic>=2.6",
+    "pydantic-settings>=2.2",
+    "sqlalchemy>=2.0",
+    "psycopg[binary]>=3.1",
+    "alembic>=1.13",
+    "httpx>=0.27",
+    "tenacity>=8.2",
+    "openai>=1.30",
+    "pyyaml>=6.0",
+    "jinja2>=3.1",
+    "typer>=0.12",
+    "pyarrow>=15",
+    "scikit-learn>=1.4",
+    "apscheduler>=3.10,<4",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8", "hypothesis>=6.100"]
+ml = ["lightgbm>=4.3"]
+rl = ["gymnasium>=0.29", "stable-baselines3>=2.3"]
+
+[project.scripts]
+sm = "stockmaster.cli:app"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+stockmaster = ["agent/prompts/**/*.md", "reporting/templates/*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+markers = ["network: live internet (set SM_NETWORK_TESTS=1)"]

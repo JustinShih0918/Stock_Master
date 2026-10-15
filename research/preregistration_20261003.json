@@ -1,0 +1,274 @@
+{
+ "registered_at": "2026-10-03T15:54:27+08:00",
+ "purpose": "Second, out-of-sample validation of top-6 strategy candidates on 2020-01..2025-08 history (data not used in design: dev 2025-12..2026-05, holdout 2026-06..08).",
+ "user_decisions": {
+  "goal": "top 6 (衝前六)",
+  "keep_partial_tsmc": true,
+  "pass_criteria": "recommended",
+  "alpha_weights": "v2 locked (config/strategy.yaml strategy_version 2026.10.1)"
+ },
+ "data_scope": {
+  "period": [
+   "2020-01-01",
+   "2025-08-31"
+  ],
+  "universe": "150-stock competition list; TPEx history unavailable at registration (TPEx blocked our backfill), so effectively the 100 TWSE names unless TPEx data is added before the run",
+  "known_biases": [
+   "universe chosen by 2026-07-31 market cap (survivorship, larger back in time)",
+   "Active Share evaluated against 2026-10 active-ETF holdings",
+   "competitor field calibrated on 2026"
+  ]
+ },
+ "primary_hypotheses": {
+  "H1": {
+   "strategy": "s10a",
+   "lab": "concentration/s10_composite_weekly.py",
+   "params": {
+    "ranking": "composite",
+    "n_core": 10,
+    "core_w": 0.0875,
+    "core_max": 0.085,
+    "tsmc_w": 0.0,
+    "n_total": 22,
+    "mode": "weekly",
+    "rebal_every": 5,
+    "speed": 0.35,
+    "core_exit": 18,
+    "sat_exit": 60,
+    "cash": 0.03,
+    "freeze_last": 5,
+    "guard": true
+   }
+  },
+  "H2": {
+   "strategy": "s10b",
+   "lab": "concentration/s10_itrust20_daily.py",
+   "params": {
+    "ranking": "itrust20",
+    "n_core": 10,
+    "core_w": 0.0875,
+    "core_max": 0.085,
+    "tsmc_w": 0.0,
+    "n_total": 22,
+    "mode": "daily",
+    "rebal_every": 5,
+    "speed": 1.0,
+    "core_exit": 18,
+    "sat_exit": 60,
+    "cash": 0.03,
+    "freeze_last": 5,
+    "guard": true
+   }
+  },
+  "H3": {
+   "strategy": "s10a_t10",
+   "params": {
+    "ranking": "composite",
+    "n_core": 10,
+    "core_w": 0.0875,
+    "core_max": 0.085,
+    "tsmc_w": 0.1,
+    "n_total": 22,
+    "mode": "weekly",
+    "rebal_every": 5,
+    "speed": 0.35,
+    "core_exit": 18,
+    "sat_exit": 60,
+    "cash": 0.03,
+    "freeze_last": 5,
+    "guard": true
+   },
+   "note": "2330 at 10% (user decision, untested before registration)"
+  },
+  "H4": {
+   "strategy": "s10b_t10",
+   "params": {
+    "ranking": "itrust20",
+    "n_core": 10,
+    "core_w": 0.0875,
+    "core_max": 0.085,
+    "tsmc_w": 0.1,
+    "n_total": 22,
+    "mode": "daily",
+    "rebal_every": 5,
+    "speed": 1.0,
+    "core_exit": 18,
+    "sat_exit": 60,
+    "cash": 0.03,
+    "freeze_last": 5,
+    "guard": true
+   },
+   "note": "2330 at 10% (user decision, untested before registration)"
+  }
+ },
+ "decontamination_checks": {
+  "A_v1": "s10a / s10a_t10 with alpha v1 weights (stockmaster.alpha.composite.DEFAULT_WEIGHTS)",
+  "B_lookback": "s10b / s10b_t10 with 投信 lookback 15 and 25 days instead of 20"
+ },
+ "secondary_record_only": "the other 13 frozen lab candidates, run unchanged; may not be promoted on this evidence",
+ "baselines": [
+  "current aggressive",
+  "current adaptive"
+ ],
+ "controls": [
+  "S10 structure + random ranking (5 seeds)",
+  "S10 + random ranking with 2330 10% (5 seeds)",
+  "tail structure random control",
+  "random two industries (10 seeds)",
+  "flow structure random ranking"
+ ],
+ "metrics": [
+  "mean excess vs TAIEX (overall and per year 2020-2025)",
+  "paired difference vs aggressive with block-bootstrap SE and 90% interval",
+  "P(top6 | N=100/300/500) under 'base' and 'concentrated' competitor fields",
+  "p90, worst window, mean max drawdown",
+  "hard violations, close breaches, warnings",
+  "share of P(top6) coming from the top 5 windows",
+  "results by TAIEX window return bucket (<0, 0-5%, >5%), 2022 reported separately"
+ ],
+ "pass_criteria_each_primary": [
+  "0 hard violations and 0 warnings in every window",
+  "paired mean difference vs aggressive > 0 and the block-bootstrap 90% interval lower bound > 0",
+  "paired difference > 0 in at least 4 of the 6 years 2020-2025",
+  "P(top6 | N=300, base) above both aggressive and the matching 'S10 + random ranking' control",
+  "A-family only: the v1-weights version must also have paired difference > 0, else treat as fit to 2026",
+  "B-family only: lookback 15 and 25 must agree in sign with 20"
+ ],
+ "rule": "No parameter changes after seeing results. Any change requires validation on separate data (e.g. live paper trading).",
+ "code_sha256": {
+  "ported/src/stockmaster/strategies/s10.py": "9bc04372cea55ceaef380621d44fe3ed3cb31dfb3255330dc9699d49a47b29a2",
+  "concentration/analyze.py": "3b9170adac0101cc8ffb64fd9b062ba048095414d730c7bafd4f7b88a7b67ab6",
+  "concentration/breach_check.py": "8dd86eb11c9655ec8a189f5ddf98e0fd3dda9e9e7ce3ae3d668166ddb75c7dec",
+  "concentration/explore_signal.py": "63a42d8d99766846aa73cb580383051bfd67721cb7431a521705520876046e26",
+  "concentration/explore_signal2.py": "8408fd466f3e8ab48cba774eab9f675e931edc0a16dd1a76136e0858194695ce",
+  "concentration/explore_signal3.py": "b07d0c755d24a94782860882212a189d166e7ba0f06097cb063ad75315ea436a",
+  "concentration/final.py": "bd3391847cc6d13b2cc1c1fab533d785621e544f302f5cdbb9d9805ce3be5035",
+  "concentration/run.py": "55335cdcd2350673aaaa7b56ee35ed9f9247a050c9b092597ccc493780e7ca39",
+  "concentration/s10_composite_weekly.py": "e67e2c88d241a578337657bf5addec79d7acc7384111b528e0117ed47f786ef1",
+  "concentration/s10_itrust20_daily.py": "8f9777cd5099ce74988ce154fede37ada0f90c7a169bcee095617c44dc91c3d0",
+  "concentration/s10_mom_weekly.py": "92544fe984d7d7887113871a8546305763c2bb77fafa065c3a92e2781cc34dc7",
+  "concentration/structure.py": "20d1f2dbcc95c77b4270d6ace285449a994aa1af9f556d4b5ca732b1b52ebb7b",
+  "events/an1.py": "7bee48746f832bc5371237eaa4d4fb9047e50a33d8c11b54486caa25117431d0",
+  "events/an2.py": "49a8368caf2d2cb0bed9501906d4a1fc1311989d1059d8fdd4f6a5e4900bd680",
+  "events/an3.py": "0d2f545b299c6d4b83d5cebb4c44a6bf3331475e6102a543351347728c282e40",
+  "events/common.py": "50e0fee27aab9274670a3106b0c098a073fe034305d62395b3e1e3d08111694a",
+  "events/dbg1.py": "dc6020782430c0ec798c7e9518fbd8b418d2d8e51853bff024bc9ad9e9b58eb1",
+  "events/dbg2.py": "542a7682bba27b99a9cd36e40b9fba6035ab55b45df31d2c88faf043727afeba",
+  "events/dbg3.py": "5fe3a891ab78bdc9a6d5dac02505989840211e792875832d4f6831d60dbe513a",
+  "events/dbg4.py": "c31b2f9195883a0a1728acafa4b09f3482e30dd91d58938225ab60cc44666a6b",
+  "events/dbg5.py": "40fb6c17c23f522b7b0b04ff15791400b517d8fd0e563674fb59a2011051c1ad",
+  "events/dbg6.py": "70743936a56ad929be805ddd69d3efd108cf7bb4793d012c91fb2f18c4596734",
+  "events/dbg7.py": "040ef36af569508f1802c469a3ab93920c56d534ca1df43d07265e32aedd8d6f",
+  "events/es1.py": "3e21d1e9853ae52db926d6e535090feb74554a11b37acca29fcf8cd1595f6715",
+  "events/es2.py": "d3beb0c43f5c0ecd8119ea60e8eb0a0e4be8d9cea8eef781ea6ba4ab3465309c",
+  "events/es3.py": "b48231d3ca132303c34f5dd4261b6aa836aeac28508c20f9c0b6919d8d5bd405",
+  "events/es4.py": "c6df774629c2ef8c2743d6aff58f49f442d34c26150162f9ef57d499aa0729b0",
+  "events/es5.py": "1af7779bed6766088ce7c9a4b6da7fb12a5aef3fd8e3a8840a038de5950a5264",
+  "events/es6.py": "c46ce3aed07c62711a54b48f33dd3c110d1ef3d1a72cd66b80c553a38638d37b",
+  "events/es7.py": "7db09697f3de35549984d11612a7604c3d178a61e6998e57bd348874d4947d96",
+  "events/ev_generic.py": "fdf8e72b744884417a4ecc4473867837fc8fcee2065f6032946687332aadd1ba",
+  "events/evt_accel_it_lag5.py": "afb3b94cda8d2627b22639e182695a24c6e73c870e867cdb2c184b938034dea3",
+  "events/evt_accel_lag5.py": "ad67976efbb82a84efea86c9b39bbaf7f4387d1d2865d403205c063c12fc29b0",
+  "events/evt_accel_lag5_notsmc.py": "dd6c2b7a03807adb60bcefe58a6750f863d754f06e020373472b0a0bfed3ca73",
+  "events/explore1.py": "27e246bc00a5a2c08b246f4f702a5d830b3d5e5682d3cbeee34ed9782721e853",
+  "events/final.py": "6bc4f16c4f820bae310c46f5977ba11b52a877a89227bc1bcced0c04fcdcc063",
+  "events/preview.py": "cfa5c3394121c30eb334bbf5a24cfcbaf4ea725f4c700a8c6a882d3bd84e45cd",
+  "events/run.py": "cae8495df07bc114b111b0ca2fde8fb69f3a38f9e1b008700e64459566854b96",
+  "events/v01.py": "0c2280096dc6e285e7483f46d3f708f37ec48fab48d6453823ebd39940064da1",
+  "events/v02.py": "9615fae40c1a56048f978b14f363dc268424a1da4ce2440715f16b158a9a3286",
+  "events/v03.py": "46a5e49010ac0b12228b793a55bcfdc0378b287120b0ee7b3641dfe07c09b26c",
+  "events/v04.py": "4abf65d6e6431c0073def00d311c38c0988fb792bc8f19814743c0cb80983955",
+  "events/v05.py": "748a2dbde1856686c70ba4855b6eb56db1d510132ae4906ffbb8fe507ebc8684",
+  "events/v06.py": "2ae710e81815202e7e4d38c191208117d9a7f5fdbebc2d8400623f7ed16ed488",
+  "events/v07.py": "a6c1bbabf18c0a0b1fc066aff5ba1889eb5a2e6ebd1279d9d877a35dc7049e67",
+  "events/v08.py": "79feb0b1a740337a59f8c1cd31638000c6c87e4b34595955b25765e019d89312",
+  "events/v09.py": "7353e3f34d6afba14953a2769c6f4368f060024baf6719d6bde78ba89bfe9a56",
+  "events/v10.py": "9b23956eb7bb801ffd59315ff21b8287af084d246108cefb054003ce72a0f306",
+  "flows/common.py": "4ba4eb0a96ad91cd7561173068532c4f750ee41f531dad534f0719c44d8dfb0c",
+  "flows/flow_consensus_vol.py": "6c436acc1cec6fedd7b0f5eacf3ccf2591603c80be0102e8fcf6fbf302946246",
+  "flows/flow_consensus_vol_mom.py": "25b27fb0e35408da165c8b369a8552b15e7a8e7913c51718a3233b2831d6317a",
+  "flows/flow_consensus_vol_mom_tsmc.py": "467c4c7caf18719469744fdeee6f4defe6cc6e92eaf844ce747f7d59802fc5db",
+  "flows/flowkit.py": "ccb86d5e9087594a14911674e91a4348f87f30326f524d7e76870ea798d1236d",
+  "flows/research.py": "aff2628e1e5816c2df75d7e073519097231a1b52526c69df2101846bd823c242",
+  "flows/runner.py": "2ae8941ed971de85acf9924a20134c2d2c461414e3073a90b06a34a7c562daa3",
+  "flows/screen.py": "d59381042631b71df6abc9734b550fab1bf25179e2c8881956ab83c819849396",
+  "lab.py": "c41ea701b9f64c578dafdc63c50791f6cfe8b8d855c4d2ec3bbce58878daa4d5",
+  "sector_beta/analyze.py": "6b4e1b2dbd7a9fd9a7b054bbd29119cb4db921c1848a37a07cc61e44b7bfff1e",
+  "sector_beta/batch1.py": "45fcb296c63588f8120a16dd6bc5a204190e45109c6e7c8de50fbeda5073603d",
+  "sector_beta/batch2.py": "a191d1fd1227c9645605054bccce4128cff2110ca45aff86a7dd947904d87fb3",
+  "sector_beta/batch3.py": "20898b53495239c6e29a5196419073b187ebac72faf70c728c09b989ba42ae99",
+  "sector_beta/batch4.py": "50f2c0b7261d552210f70085fbf4a8e5d3c47ff3e11d2730c9ceb170be3e9604",
+  "sector_beta/beta_momentum.py": "6f664b743f5bab917847b8f99e669e98252c690fded549da9e3528a6507b9084",
+  "sector_beta/common.py": "8119da1afd49bf6495ff1e4e036499d99e47d6dba2a4efd2a0e0a07504e7780d",
+  "sector_beta/explore.py": "1cfa8c9e1ca61a69b0ce1d177840fa4764ab372246dbd9fbdcd488d8fb68ac67",
+  "sector_beta/explore2.py": "54feedf298f5443ae668a24846464352fd5b587658a6d31856c779a727bf7cec",
+  "sector_beta/final_eval.py": "8b11bf7dc4c28b415c40273458487811b4e2df513d40a2fb7ba104096ae399bc",
+  "sector_beta/hot_industry_momentum.py": "0386a51b57309a9b840fa3cd76219dd6bd2f6f7b3e586c8b9f71e9b1d5bcd944",
+  "sector_beta/liquidity.py": "54471643ee19ab75f832e88795dac1deb1e7c4c1661c54918affc23ce7796b3e",
+  "sector_beta/runner.py": "72ba8d946d419f8da4c5fa16d9007bf1a5328297815207870bcd33469b8e37e0",
+  "sector_beta/sb_common_v1.py": "8119da1afd49bf6495ff1e4e036499d99e47d6dba2a4efd2a0e0a07504e7780d",
+  "sector_beta/two_hot_industries.py": "8ccbf6983cef3d892ed5f7630e493c66993aef2f38b376fbdc88566584f07e32",
+  "tails/jitter.py": "064d45a9ee8313db02ad597aeb977a50dcaa8b777478ae5209949d06df680453",
+  "tails/placebo.py": "f2844650becca19cbed966cc1a1d1f93baa8ce5ca5c923fee5ec0ae7ac686859",
+  "tails/run.py": "696cd9a710854063bafb8888c3295a38759ceb610e536dd1ff3b8cab41a39b34",
+  "tails/tail_flowbreak.py": "17981fa8ba4eb9ba4c0ad0d111514fe9048643d8fdf11067ffa7c60e65690b15",
+  "tails/tail_volmom.py": "1a5d3cdbd2da19978a06d04099f7cf30fab0180c18809d410da96d990ad39702",
+  "tails/tail_volmom_t10.py": "e72b2a3f4b1162f4e2d73d32b338b01b62dadefd02e29ba0ba786fc308f76500",
+  "tails/tailcore_v1.py": "ee728ccb27aa6d0e291d57a0e8fc441722f2fdbcd316c21688bbaf302a9fa3e5",
+  "tails/tailkit.py": "6ed544285e06dc3c8f3d2a88c84217d64d8025a2f67a0f2dc5c7a920ccaaf52a"
+ },
+ "replay_check": "ported s10 == lab structure: max abs weight difference 0.0 over 15 windows x 24 days x 4 variants (2026-10-03)",
+ "amendments": [
+  {
+   "at": "2026-10-03T15:56:12+08:00",
+   "file": "src/stockmaster/strategies/s10.py",
+   "change": "docstring only: documents that the nominal 10% 2330 weight is scaled with the core (~8.1% day 1, ~9.1% after); no logic change; no validation results had been produced yet",
+   "new_sha256": "58e63f9ecde7206b937104689fdd69319cac70db0b08d9e1f30aade7f8253e0c",
+   "logic_sha256_without_docstrings": "5af95f2f4e22c7ffe3cac04e285c7871ad0d2f4e02b97d2f570750b80790152f"
+  },
+  {
+   "at": "2026-10-03T18:52:44+08:00",
+   "status": "made before any 2020-2025 strategy, baseline or control result existed",
+   "evaluation_harness": {
+    "lab": "scratchpad/top6_long/longlab.py, lab version 2026-10-03.3 (built by the long-history-lab-build workflow, fixes listed in top6_long/CHANGES.md)",
+    "fixes": [
+     "corporate actions: split/par-value detection compares with the last AVAILABLE close (catches events after suspensions); 10 events back-adjusted (6415 2022-07-13; 2368, 2603 2022-09-19; 2409, 3481 2022-10-11; 2327 2022-10-31; 3481 2023-08-28; 3481 2024-08-26; 6919 2025-07-21; 2327 2025-08-25)",
+     "engine features and scores include only names with a close by the decision date (no revenue-only ranks for unlisted names)",
+     "competitor field v2: halted/suspended holdings valued at the last close (not 0)",
+     "coverage gate: margin/valuation >= 95% of days AND every day the features read",
+     "stale snapshots from older lab versions are rebuilt automatically"
+    ],
+    "universe_mode": "twse (the 100 TWSE names; TPEx history unavailable), as anticipated in data_scope"
+   },
+   "dividends": {
+    "source": "TWSE TWT49U 除權除息計算結果表 2020-2026 loaded into corp_action (value = 權值+息值 per share)",
+    "treatment": "holdings at the previous close accrue the value on the ex-date; it is added to the FINAL NAV only (organizer rule), not to daily NAV or drawdown; values before a split event are scaled by the event factor",
+    "metrics": "paired comparisons (pass criteria 2, 3 and the A_v1 / B lookback checks) use ret_total (with dividends); P(top6), excess vs TAIEX and the competitor field use price-only returns because the field and TAIEX are price-only (criterion 4 compares price-only P(top6) for all policies alike)",
+    "reason": "the audit found no dividend data for 2020-2025; price-only returns penalise high-yield holdings (e.g. financials) in Jun-Sep windows, while the competition credits dividends at the end"
+   },
+   "controls": {
+    "S10_random_ranking": "top6_long/controls_s10.py: one random permutation per window (numpy default_rng([seed, first trade date ordinal])), seeds 0-4, for each of s10a, s10b, s10a_t10, s10b_t10 (20 runs)",
+    "criterion_4_interpretation": "P(top6 | N=300, base) must exceed aggressive AND the MEAN P(top6) of the 5 seeds of the matching S10 random control; whether it beats every seed is reported, not required",
+    "other_controls": "flow random (seeds 0-4), random two industries (seeds 1-10) and the tail placebo (draws 0-4) run unchanged, as in the 2026 validation"
+   },
+   "descriptive_precommitments": [
+    "report every metric split into windows overlapping Jun-Sep (ex-dividend season) vs other windows",
+    "sensitivity: exclude windows containing the locked-limit days 2024-08-05 and 2025-04-07..10",
+    "known limitation: windows start 2020-07-21 (130-day warm-up), so the Feb-Mar 2020 crash is not tested; 2020 covers Jul-Dec starts and 2025 Jan-Jul starts"
+   ],
+   "harness_sha256": {
+    "top6_long/audit_data.py": "33b3b8f39696021caba0b6b4b355c3f8b97751f0ecaa408f68dd2eee6e0761fa",
+    "top6_long/controls_s10.py": "e75407ddd1a32f0f618d0c5250eb46bc6cef2df8b83b02568fe75e204b78274e",
+    "top6_long/longlab.py": "d5656470a15a78e4d707b03ee0cf309572251f892d1a79718df0e3808356cf79",
+    "top6_long/run_prereg.py": "77de96e2fb245abf66d69c2c4319fa862c44c2f75af56f6b76ffd805aab41c4b",
+    "top6_long/test_machinery.py": "9d342f3f2100b8a5f172e77278d254cc1c41f6303247000976c9c54251c3ddec",
+    "top6_long/timing.py": "64c0306b671297fda0789f617516b5b8ffd1eacf79c91e4d9a829dc0b51187f0",
+    "top6/validate_flows_flow_consensus_vol/vwrap.py": "6f0f78d48afbdbe5b035e4d57f057910119cbf897c0392211a8deddcd04a8211",
+    "top6/validate_sector_beta_two_hot_industries/vwrap.py": "7ec1ab00c418f31dee5f8709e9543495eea24eeb0a03220fdc4989a55ab1472a",
+    "top6/tails/placebo.py": "f2844650becca19cbed966cc1a1d1f93baa8ce5ca5c923fee5ec0ae7ac686859",
+    "src/stockmaster/backtest/engine.py": "4984bf0da371129d821d623c61c0d478162603ee17f7963148cfda39f36d970a",
+    "src/stockmaster/data/reference.py": "8438e13e375227bb30fb03de53a0b41eff1d8b29a037f3a2c3ad6de9f52f1be3"
+   }
+  }
+ ]
+}

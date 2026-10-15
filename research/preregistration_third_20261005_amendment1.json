@@ -1,0 +1,33 @@
+{
+ "amends": "research/preregistration_third_20261005.json",
+ "amends_sha256": "f398b19a9cbf6160aa3edbc3a1d41a1d1edd84f628718461d904ba816a54ac95",
+ "at": "2026-10-05T06:23:08+08:00",
+ "status": "written after data loading and read-only checks, BEFORE build/run; no 2014-2020 strategy, control or baseline result exists",
+ "harness_sha256": {
+  "top6_third/lab3.py": "18f028ac9c8e47d256aaef5b9a260aa6b4eed8722898ead82a7b267a8d9dd4f0",
+  "top6_third/run_third.py": "3c1bb723cd17b3b68e92c4ab06680717cf43ee37bfe27d9276a2d9fc4b891f21",
+  "top6_third/controls_third.py": "2775b97707a5b133401ae87c9059248ab41c6364c946564751fe42cd30ed4677",
+  "top6_third/datagates_third.py": "134f05f53f30b67451757a244792d30249eb6ddd98fdddbb5b6471614e7ef35c",
+  "src/stockmaster/data/sources/twse.py": "083bc7e59467344ab7a8febb659aa3c7e2800906b28c7a0aa50a676894ee60cf",
+  "src/stockmaster/backtest/engine.py": "362329f748d4a792ec6de447dd13a8e4ed79003042475647cbc30fae6004aa43"
+ },
+ "decisions": {
+  "active_etf_holdings": "LAB3_ETF_SOURCE=second_validation (identical to the second validation; fixed, unaffected by later DB re-fetches)",
+  "universe": "LAB3_UNIVERSE=twse",
+  "p_value_estimator": "one-sided block-bootstrap p = share of the 2000 bootstrap means of the paired difference (ret_total vs aggressive) that are <= 0 (ties count for H0), same draws as the 90% interval (block 24 windows, seed 0); Holm step-down over the 5 primaries (a missing primary enters with p = 1); pass if adjusted p < 0.05"
+ },
+ "data_fixes_before_run": [
+  "TAIEX stored as '加權股價指數' on 2019-04-29 renamed to the standard '發行量加權股價指數' (1 row); parser now normalizes TAIEX name variants",
+  "T86 parser handles both older layouts: before 2017-12-18 a single 外資 column; before 2014-12-01 only the combined dealer net (stored as dealer_self_net, dealer_hedge_net = 0); the 106 missing 2014-07..11 flow days were re-fetched"
+ ],
+ "check_results": {
+  "datagates_exit": 0,
+  "run_third_check_exit": 0,
+  "registration_ok": true,
+  "code_hashes_ok": true,
+  "specs": "49/49",
+  "etf_equal_second_validation": true,
+  "corporate_actions_detected": 9,
+  "field_ok": "false (built in the build phase, as designed)"
+ }
+}

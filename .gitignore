@@ -1,0 +1,42 @@
+.env
+.claude/
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.hypothesis/
+node_modules/
+dist/
+build/
+*.egg-info/
+
+# Runtime data: raw payloads, generated reports, logs, model checkpoints (reproducible from code + sources)
+data/
+artifacts/
+logs/
+reference/*
+!reference/README.md
+
+# Local env variants (keep the template)
+.env.*
+!.env.example
+
+# Test / coverage output
+.coverage
+.coverage.*
+htmlcov/
+coverage.xml
+
+# Editor / OS
+.vscode/
+.idea/
+*.swp
+.DS_Store
+
+# Stray logs and model checkpoints outside the runtime dirs
+*.log
+*.pt
+*.ckpt
+*.zip

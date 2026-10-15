@@ -1,0 +1,52 @@
+# Official rules of AI CUP 2026 玉山人工智慧公開挑戰賽 "Agent 基金經理人" (preliminary round).
+# Source: 比賽辦法 PDF, sections 五 and 六. Change a value here only when the organizer changes the rules.
+competition_id: esun_ai_cup_2026
+initial_cash: 1000000000          # NT$, all cash at the start
+lot_size: 1000                    # whole lots only (整股), no odd lots
+universe_file: universe_esun2026.csv
+universe_as_of: 2026-07-31        # market-cap ranking date of the fixed 150-stock list
+
+period:
+  start: 2026-10-26               # first calendar day of the round (a TWSE holiday in 2026)
+  end: 2026-11-27                 # final NAV date
+  expected_trading_days: 24
+
+submission:
+  window_open_prev_day: "19:30"   # T-1 19:30 Asia/Taipei
+  window_close: "08:55"           # T 08:55 Asia/Taipei
+  max_per_day: 25                 # last submission of the day counts
+  min_days_for_ranking: 22
+
+fill_price: vwap                  # 當日成交均價, all orders fully filled
+valuation_price: close            # NAV = sum(lots * 1000 * close) + cash
+
+fees:
+  commission_rate: 0.001425       # both sides
+  sell_tax_rate: 0.003            # 證交稅, sells only
+  rounding: floor                 # organizer rounding is unconfirmed: floor | round | none
+  min_commission: 0
+
+holdings:
+  min_count: 20
+  max_count: 30
+
+weight_caps:                      # share of NAV, measured at the close
+  default: 0.10
+  overrides:
+    "2330": 0.25
+drift_grace_trading_days: 5       # overweight from price drift must be fixed within 5 trading days
+
+cash:
+  min: 0.0                        # negative cash is a violation
+  max_exclusive: 0.25             # cash must be < 25% of NAV
+
+active_share:
+  min: 0.20                       # vs top-10 holdings of each reference active ETF
+  top_n: 10
+  consecutive_days_to_disqualify: 2
+  reference_list_date: 2026-09-11
+
+price_limit_pct: 0.10             # TWSE/TPEx daily price limit, used for stress tests
+warnings_to_disqualify: 3
+dividends: accrue_until_end       # cash dividends are added to NAV only at the end of the round
+prohibited: [margin, short_sale, securities_lending, day_trade, odd_lot]
